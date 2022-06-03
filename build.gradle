@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        compose_version = '1.2.0-beta02'
+        compose_version = '1.2.0-beta03'
         kotlin_version = '1.6.21'
     }
     repositories {
@@ -21,8 +21,9 @@ buildscript {
 
 allprojects {
     plugins.withId("com.vanniktech.maven.publish") {
-        mavenPublish {
-            sonatypeHost = "S01"
+        mavenPublishing {
+            publishToMavenCentral("S01")
+            signAllPublications()
         }
     }
 }
