@@ -67,7 +67,7 @@ Another BottomSheet in Jetpack Compose.
 Add the dependency [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets):
 
 ```groovy
-implementation "io.github.dokar3.sheets:sheets:latest_version"
+implementation "io.github.dokar3:sheets:latest_version"
 ```
 
 **Basic**
