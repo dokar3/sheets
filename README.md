@@ -87,12 +87,10 @@ BottomSheet(state = state) {
 
 **Skip peek state**
 
-To skip peek state, set `peekHeight` to a value at least equal to the content height, eg. `PeekHeight.px(Int.MAX_VALUE)`, `PeekHeight.fraction(1f)`:
-
 ```kotlin
 BottomSheet(
     state = state,
-    peekHeight = PeekHeight.fraction(1f),
+    skipPeek = true,
 ) { 
     ...
 }

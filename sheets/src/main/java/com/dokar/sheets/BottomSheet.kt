@@ -53,9 +53,8 @@ import kotlin.math.min
  *
  * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
  * @param modifier Modifier for bottom sheet content.
- * @param peekHeight Peek height, could be a dp, px, or fraction value. To skip the peek state,
- * set the peek height to a value at least equal to the content height, e.g, PeekHeight.fraction(1f),
- * PeekHeight.px(Int.MAX_VALUE). Defaults to PeekHeight.fraction(0.5f).
+ * @param skipPeek Skip the peek state if set to true. Defaults to false.
+ * @param peekHeight Peek height, could be a dp, px, or fraction value.
  * @param backgroundColor Background color for sheet content.
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
@@ -67,6 +66,7 @@ import kotlin.math.min
 fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
+    skipPeek: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
     shape: Shape = MaterialTheme.shapes.medium.copy(
         bottomStart = CornerSize(0.dp),
@@ -87,6 +87,7 @@ fun BottomSheet(
     val scope = rememberCoroutineScope()
 
     val currentState by rememberUpdatedState(state)
+    val currentSkipPeek by rememberUpdatedState(skipPeek)
     val currentPeekHeight by rememberUpdatedState(peekHeight)
     val currentShape by rememberUpdatedState(shape)
     val currentBackgroundColor by rememberUpdatedState(backgroundColor)
@@ -120,6 +121,7 @@ fun BottomSheet(
                 BottomSheetLayout(
                     state = currentState,
                     modifier = modifier,
+                    skipPeek = currentSkipPeek,
                     peekHeight = currentPeekHeight,
                     shape = currentShape,
                     backgroundColor = currentBackgroundColor,
@@ -156,6 +158,7 @@ fun BottomSheet(
 fun BottomSheetLayout(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
+    skipPeek: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
     shape: Shape = MaterialTheme.shapes.medium.copy(
         bottomStart = CornerSize(0.dp),
@@ -184,6 +187,7 @@ fun BottomSheetLayout(
 
     SideEffect {
         state.peekHeight = peekHeight
+        state.forceSkipPeek = skipPeek
         state.maxDimAmount = maxDimAmount
     }
 

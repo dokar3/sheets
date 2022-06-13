@@ -76,6 +76,8 @@ class BottomSheetState(
 
     internal lateinit var peekHeight: PeekHeight
 
+    internal var forceSkipPeek: Boolean = false
+
     private var pendingToStartAnimation = false
 
     internal val isAnimating: Boolean
@@ -370,7 +372,7 @@ class BottomSheetState(
         if (contentHeight == 0 || !::peekHeight.isInitialized) {
             return false
         }
-        return getPeekHeightInPx() >= contentHeight
+        return forceSkipPeek || getPeekHeightInPx() >= contentHeight
     }
 
     internal fun getPeekHeightInPx(): Float {

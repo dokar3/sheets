@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Suppress("deprecation")
 @Composable
 fun App() {
     var dark by remember { mutableStateOf(false) }
@@ -149,7 +148,7 @@ fun SimpleBottomSheet(
     BottomSheet(
         state = state,
         modifier = modifier,
-        peekHeight = PeekHeight.px(Int.MAX_VALUE),
+        skipPeek = true,
     ) {
         SimpleSheetContent(state)
     }
@@ -206,7 +205,7 @@ private fun TextFieldBottomSheet(
     BottomSheet(
         state = state,
         modifier = modifier,
-        peekHeight = PeekHeight.fraction(1f),
+        skipPeek = true,
     ) {
         TextFieldSheetContent(state = state)
     }
@@ -221,7 +220,7 @@ private fun EmbeddedBottomSheet(
         BottomSheetLayout(
             state = state,
             modifier = modifier,
-            peekHeight = PeekHeight.fraction(1f),
+            skipPeek = true,
         ) {
             Box(
                 modifier = Modifier
