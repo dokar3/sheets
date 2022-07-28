@@ -27,13 +27,6 @@ import kotlin.math.max
 fun rememberBottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
 ): BottomSheetState {
-    require(
-        initialValue == BottomSheetValue.Collapsed ||
-                initialValue == BottomSheetValue.Peek ||
-                initialValue == BottomSheetValue.Expanded
-    ) {
-        "Illegal initial value ${initialValue}, the value should be one of [Collapsed, Peek, Expanded]."
-    }
     return rememberSaveable(
         inputs = emptyArray(),
         saver = Saver(
@@ -85,12 +78,21 @@ class BottomSheetState(
 
     private var onDragStoppedJob: Job? = null
 
-    private var dragVelocity = 0f
+    internal var dragVelocity = 0f
+        private set
 
     private val velocityTracker = VelocityTracker()
 
     var value by mutableStateOf(initialValue)
         private set
+
+    private var animState by mutableStateOf(AnimState.None)
+
+    val isPeeking: Boolean = animState == AnimState.Peeking
+
+    val isExpanding: Boolean = animState == AnimState.Expanding
+
+    val isCollapsing: Boolean = animState == AnimState.Collapsing
 
     val dragProgress: Float
         get() {
@@ -199,18 +201,15 @@ class BottomSheetState(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float>
     ) {
-        this.value = when (value) {
+        this.animState = when (value) {
             BottomSheetValue.Expanded -> {
-                BottomSheetValue.Expanding
+                AnimState.Expanding
             }
             BottomSheetValue.Peek -> {
-                BottomSheetValue.Peeking
+                AnimState.Peeking
             }
             BottomSheetValue.Collapsed -> {
-                BottomSheetValue.Collapsing
-            }
-            else -> {
-                throw IllegalArgumentException("Illegal bottom sheet value")
+                AnimState.Collapsing
             }
         }
         stopAnimation()
@@ -219,6 +218,7 @@ class BottomSheetState(
         } else {
             jumpToValue(value)
         }
+        this.animState = AnimState.None
         this.value = value
     }
 
@@ -235,9 +235,6 @@ class BottomSheetState(
             }
             BottomSheetValue.Collapsed -> {
                 AnimValues(offsetY = contentHeight.toFloat(), dimAmount = 0f)
-            }
-            else -> {
-                throw IllegalArgumentException("Illegal bottom sheet value")
             }
         }
     }
@@ -302,9 +299,6 @@ class BottomSheetState(
                 BottomSheetValue.Peek -> {
                     peek(animationSpec = spring())
                 }
-                else -> {
-                    throw IllegalArgumentException("Illegal bottom sheet value")
-                }
             }
             resetVelocity()
         }
@@ -319,8 +313,7 @@ class BottomSheetState(
 
         if (dragVelocity >= 1000f) {
             // Fast pull down
-            if (value == BottomSheetValue.Expanded ||
-                value == BottomSheetValue.Expanding
+            if (value == BottomSheetValue.Expanded
             ) {
                 if (shouldSkipPeekState()) {
                     val shouldCollapse = dy >= swipeToDismissDy ||
@@ -332,9 +325,7 @@ class BottomSheetState(
                 } else {
                     return BottomSheetValue.Peek
                 }
-            } else if (value == BottomSheetValue.Peek ||
-                value == BottomSheetValue.Peeking ||
-                value == BottomSheetValue.Collapsing
+            } else if (value == BottomSheetValue.Peek
             ) {
                 return BottomSheetValue.Collapsed
             }
@@ -344,25 +335,25 @@ class BottomSheetState(
             return BottomSheetValue.Expanded
         }
 
-        if (!shouldSkipPeekState()) {
-            val peekHeightPx = getPeekHeightInPx()
-            val peekCy = contentHeight - peekHeightPx
-            val peekTop = peekCy - peekCy / 2f
-            val peekBottom = peekCy + peekHeightPx / 2.5f
-
-            if (offsetYAnimatable.value in peekTop..peekBottom) {
-                return BottomSheetValue.Peek
-            }
-
-            if (offsetYAnimatable.value < peekTop) {
-                return BottomSheetValue.Expanded
-            }
-        } else {
+        if (shouldSkipPeekState()) {
             return if (offsetYAnimatable.value >= swipeToDismissDy) {
                 BottomSheetValue.Collapsed
             } else {
                 BottomSheetValue.Expanded
             }
+        }
+
+        val peekHeightPx = getPeekHeightInPx()
+        val peekCy = contentHeight - peekHeightPx
+        val peekTop = peekCy - peekCy / 2f
+        val peekBottom = peekCy + peekHeightPx / 2.5f
+
+        if (offsetYAnimatable.value in peekTop..peekBottom) {
+            return BottomSheetValue.Peek
+        }
+
+        if (offsetYAnimatable.value < peekTop) {
+            return BottomSheetValue.Expanded
         }
 
         return BottomSheetValue.Collapsed
@@ -394,18 +385,22 @@ class BottomSheetState(
         val dimAmount: Float,
     )
 
+    internal enum class AnimState {
+        None,
+        Peeking,
+        Expanding,
+        Collapsing
+    }
+
     companion object {
         internal fun save(state: BottomSheetState): Any {
             return when (state.value) {
-                BottomSheetValue.Expanding,
                 BottomSheetValue.Expanded -> {
                     BottomSheetValue.Expanded
                 }
-                BottomSheetValue.Peeking,
                 BottomSheetValue.Peek -> {
                     BottomSheetValue.Peek
                 }
-                BottomSheetValue.Collapsing,
                 BottomSheetValue.Collapsed -> {
                     BottomSheetValue.Collapsed
                 }
