@@ -24,15 +24,19 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -185,6 +189,10 @@ fun BottomSheetLayout(
 
     val contentAlpha = remember(state) { Animatable(0f) }
 
+    var gestureDownPos by remember { mutableStateOf(Offset.Zero) }
+
+    val sheetLayoutState = rememberSheetContentLayoutState()
+
     SideEffect {
         state.peekHeight = peekHeight
         state.forceSkipPeek = skipPeek
@@ -213,27 +221,29 @@ fun BottomSheetLayout(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .drawBehind { drawRect(color = dimColor.copy(alpha = dimAlpha)) }
             .nestedScroll(nestedScrollConnection)
-            .background(dimColor.copy(alpha = dimAlpha))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = {
-                    if (behaviors.collapseOnClickOutside) {
-                        coroutineScope.launch {
-                            state.collapse()
-                        }
+                    if (!behaviors.collapseOnClickOutside) {
+                        return@clickable
                     }
+                    if (state.dragVelocity < 1000f
+                        && sheetLayoutState.isWithinContentBounds(gestureDownPos)
+                    ) {
+                        // Swiping up but the tap event was triggered, ignore
+                        return@clickable
+                    }
+                    coroutineScope.launch { state.collapse() }
                 },
             )
             .detectPointerPositionChanges(
                 key = state,
-                onPositionChanged = {
-                    state.addVelocity(it.y)
-                },
-                onGestureEnd = {
-                    state.resetVelocity()
-                }
+                onDown = { gestureDownPos = it },
+                onPositionChanged = { state.addVelocity(it.y) },
+                onGestureEnd = { state.resetVelocity() },
             ),
     ) {
         Box(
@@ -261,6 +271,7 @@ fun BottomSheetLayout(
             }
 
             SheetContentLayout(
+                state = sheetLayoutState,
                 contentOffsetY = { size ->
                     if (state.contentHeight == size.height) {
                         return@SheetContentLayout state.offsetY.toInt()
@@ -275,7 +286,6 @@ fun BottomSheetLayout(
                     state.contentHeight = size.height
 
                     when (state.value) {
-                        BottomSheetValue.Expanding,
                         BottomSheetValue.Expanded -> {
                             val offsetY = if (isAnimating) {
                                 min(size.height, initialOffsetY.toInt())
@@ -306,7 +316,6 @@ fun BottomSheetLayout(
                             }
                             return@SheetContentLayout offsetY
                         }
-                        BottomSheetValue.Peeking,
                         BottomSheetValue.Peek -> {
                             val offsetY = if (isAnimating) {
                                 size.height
@@ -337,7 +346,6 @@ fun BottomSheetLayout(
                             }
                             return@SheetContentLayout offsetY
                         }
-                        BottomSheetValue.Collapsing,
                         BottomSheetValue.Collapsed -> {
                             val offsetY = size.height
                             coroutineScope.launch {
@@ -384,8 +392,22 @@ fun BottomSheetLayout(
 }
 
 @Composable
+private fun rememberSheetContentLayoutState(): SheetContentLayoutState {
+    return remember { SheetContentLayoutState() }
+}
+
+private class SheetContentLayoutState {
+    var contentY = 0
+
+    fun isWithinContentBounds(offset: Offset): Boolean {
+        return offset.y >= contentY
+    }
+}
+
+@Composable
 private fun SheetContentLayout(
     modifier: Modifier = Modifier,
+    state: SheetContentLayoutState = rememberSheetContentLayoutState(),
     contentOffsetY: (IntSize) -> Int = { 0 },
     content: @Composable () -> Unit,
 ) {
@@ -400,10 +422,9 @@ private fun SheetContentLayout(
 
         layout(width = constraints.maxWidth, height = constraints.maxHeight) {
             val offsetY = contentOffsetY(IntSize(width, height))
-            placeable.placeRelative(
-                x = 0,
-                y = constraints.maxHeight - height + offsetY,
-            )
+            val y = constraints.maxHeight - height + offsetY
+            state.contentY = y
+            placeable.placeRelative(x = 0, y = y)
         }
     }
 }
