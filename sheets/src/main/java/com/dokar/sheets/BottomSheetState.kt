@@ -88,11 +88,11 @@ class BottomSheetState(
 
     private var animState by mutableStateOf(AnimState.None)
 
-    val isPeeking: Boolean = animState == AnimState.Peeking
+    val isPeeking: Boolean get() = animState == AnimState.Peeking
 
-    val isExpanding: Boolean = animState == AnimState.Expanding
+    val isExpanding: Boolean get() = animState == AnimState.Expanding
 
-    val isCollapsing: Boolean = animState == AnimState.Collapsing
+    val isCollapsing: Boolean get() = animState == AnimState.Collapsing
 
     val dragProgress: Float
         get() {
