@@ -150,7 +150,7 @@ internal class DialogWrapper(
             statusBarColor = behaviors.statusBarColor.toArgb()
             navigationBarColor = behaviors.navigationBarColor.toArgb()
 
-            WindowCompat.getInsetsController(this, decorView)?.let { controller ->
+            WindowCompat.getInsetsController(this, decorView).let { controller ->
                 controller.isAppearanceLightStatusBars = behaviors.lightStatusBar
                 controller.isAppearanceLightNavigationBars = behaviors.lightNavigationBar
             }
