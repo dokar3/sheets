@@ -105,7 +105,10 @@ fun BottomSheet(
     val dialog = remember(view, state) {
         DialogWrapper(
             onDismissRequest = {
-                if (state.value == BottomSheetValue.Expanded && !state.shouldSkipPeekState()) {
+                if (state.value == BottomSheetValue.Expanded
+                    && !state.shouldSkipPeekState()
+                    && !state.isPeeking
+                ) {
                     scope.launch {
                         state.peek()
                     }
