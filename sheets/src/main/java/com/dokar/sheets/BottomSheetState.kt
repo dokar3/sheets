@@ -306,15 +306,14 @@ class BottomSheetState(
 
     private fun nextValue(): BottomSheetValue {
         if (dragVelocity >= 20000f) {
+            // Quick pull down
             return BottomSheetValue.Collapsed
         }
 
         val dy = offsetYAnimatable.value
 
         if (dragVelocity >= 1000f) {
-            // Fast pull down
-            if (value == BottomSheetValue.Expanded
-            ) {
+            if (value == BottomSheetValue.Expanded || isExpanding) {
                 if (shouldSkipPeekState()) {
                     val shouldCollapse = dy >= swipeToDismissDy ||
                             dy > swipeToDismissDy * 0.7f && dragVelocity >= 2000f ||
@@ -325,8 +324,7 @@ class BottomSheetState(
                 } else {
                     return BottomSheetValue.Peek
                 }
-            } else if (value == BottomSheetValue.Peek
-            ) {
+            } else if (value == BottomSheetValue.Peek) {
                 return BottomSheetValue.Collapsed
             }
         }
