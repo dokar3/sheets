@@ -14,9 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -59,9 +57,9 @@ class BottomSheetState(
 
     internal var swipeToDismissDy by mutableStateOf(0f)
 
-    private var dimAnim: Deferred<*>? = null
+    private var dimAnim: Job? = null
 
-    private var dragYAnim: Deferred<*>? = null
+    private var dragYAnim: Job? = null
 
     internal var expandAnimationSpec: AnimationSpec<Float>? = null
 
@@ -155,6 +153,7 @@ class BottomSheetState(
 
     internal suspend fun stopAnimation() {
         dragYAnim?.cancel()
+        dimAnim?.cancel()
         if (offsetYAnimatable.isRunning) {
             offsetYAnimatable.stop()
         }
@@ -241,20 +240,32 @@ class BottomSheetState(
 
     private suspend fun animateToValue(
         newValue: BottomSheetValue,
-        dragAnimSpec: AnimationSpec<Float>,
+        animationSpec: AnimationSpec<Float>,
     ) = coroutineScope {
+        val initialVelocity = dragVelocity.coerceIn(-1000f, 1000f)
+
         pendingToStartAnimation = contentHeight == 0
         if (pendingToStartAnimation) {
+            this@BottomSheetState.animState = AnimState.None
+            this@BottomSheetState.value = newValue
+            // Run a dummy animation to suspend the caller coroutine. Make it looks like
+            // we are running animations in the caller coroutine, but we won't start
+            // animations until the content height is available
+            Animatable(0f).animateTo(
+                targetValue = 1f,
+                initialVelocity = initialVelocity,
+                animationSpec = animationSpec
+            )
             return@coroutineScope
         }
 
         val targetAnimValues = calcTargetAnimValues(newValue)
 
-        val dragY = async {
+        val dragY = launch {
             offsetYAnimatable.animateTo(
                 targetValue = targetAnimValues.offsetY,
-                initialVelocity = dragVelocity.coerceIn(-1000f, 1000f),
-                animationSpec = dragAnimSpec
+                initialVelocity = initialVelocity,
+                animationSpec = animationSpec
             )
         }
 
@@ -269,13 +280,13 @@ class BottomSheetState(
             }
             animatable.animateTo(
                 targetValue = targetAnimValues.dimAmount,
-                animationSpec = dragAnimSpec,
+                animationSpec = animationSpec,
             )
         }
 
         dragYAnim = dragY
 
-        dragY.await()
+        dragY.join()
         dimAmount.cancel()
 
         dimAnim = null
