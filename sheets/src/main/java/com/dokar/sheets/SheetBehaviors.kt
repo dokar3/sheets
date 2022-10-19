@@ -9,7 +9,8 @@ import androidx.compose.ui.window.SecureFlagPolicy
 class DialogSheetBehaviors(
     collapseOnBackPress: Boolean,
     collapseOnClickOutside: Boolean,
-    fitsSystemWindows: Boolean,
+    extendsIntoStatusBar: Boolean = false,
+    extendsIntoNavigationBar: Boolean = false,
     val dialogSecurePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
     val dialogWindowSoftInputMode: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
     val lightStatusBar: Boolean = false,
@@ -19,7 +20,8 @@ class DialogSheetBehaviors(
 ) : SheetBehaviors(
     collapseOnBackPress = collapseOnBackPress,
     collapseOnClickOutside = collapseOnClickOutside,
-    fitsSystemWindows = fitsSystemWindows,
+    extendsIntoStatusBar = extendsIntoStatusBar,
+    extendsIntoNavigationBar = extendsIntoNavigationBar,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -54,7 +56,8 @@ class DialogSheetBehaviors(
 open class SheetBehaviors(
     val collapseOnBackPress: Boolean,
     val collapseOnClickOutside: Boolean,
-    val fitsSystemWindows: Boolean,
+    val extendsIntoStatusBar: Boolean,
+    val extendsIntoNavigationBar: Boolean,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -64,7 +67,8 @@ open class SheetBehaviors(
 
         if (collapseOnBackPress != other.collapseOnBackPress) return false
         if (collapseOnClickOutside != other.collapseOnClickOutside) return false
-        if (fitsSystemWindows != other.fitsSystemWindows) return false
+        if (extendsIntoStatusBar != other.extendsIntoStatusBar) return false
+        if (extendsIntoNavigationBar != other.extendsIntoNavigationBar) return false
 
         return true
     }
@@ -72,7 +76,8 @@ open class SheetBehaviors(
     override fun hashCode(): Int {
         var result = collapseOnBackPress.hashCode()
         result = 31 * result + collapseOnClickOutside.hashCode()
-        result = 31 * result + fitsSystemWindows.hashCode()
+        result = 31 * result + extendsIntoStatusBar.hashCode()
+        result = 31 * result + extendsIntoNavigationBar.hashCode()
         return result
     }
 }

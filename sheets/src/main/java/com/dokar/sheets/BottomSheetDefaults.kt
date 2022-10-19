@@ -21,7 +21,8 @@ object BottomSheetDefaults {
     fun dialogSheetBehaviors(
         collapseOnBackPress: Boolean = true,
         collapseOnClickOutside: Boolean = true,
-        fitsSystemWindows: Boolean = true,
+        extendsIntoStatusBar: Boolean = false,
+        extendsIntoNavigationBar: Boolean = false,
         dialogSecurePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
         dialogWindowSoftInputMode: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
         lightStatusBar: Boolean = false,
@@ -32,7 +33,8 @@ object BottomSheetDefaults {
         return DialogSheetBehaviors(
             collapseOnBackPress = collapseOnBackPress,
             collapseOnClickOutside = collapseOnClickOutside,
-            fitsSystemWindows = fitsSystemWindows,
+            extendsIntoStatusBar = extendsIntoStatusBar,
+            extendsIntoNavigationBar = extendsIntoNavigationBar,
             dialogSecurePolicy = dialogSecurePolicy,
             dialogWindowSoftInputMode = dialogWindowSoftInputMode,
             lightStatusBar = lightStatusBar,
@@ -45,12 +47,14 @@ object BottomSheetDefaults {
     fun sheetBehavior(
         collapseOnBackPress: Boolean = true,
         collapseOnClickOutside: Boolean = true,
-        fitsSystemWindows: Boolean = false,
+        extendsIntoStatusBar: Boolean = false,
+        extendsIntoNavigationBar: Boolean = false,
     ): SheetBehaviors {
         return SheetBehaviors(
             collapseOnBackPress = collapseOnBackPress,
             collapseOnClickOutside = collapseOnClickOutside,
-            fitsSystemWindows = fitsSystemWindows,
+            extendsIntoStatusBar = extendsIntoStatusBar,
+            extendsIntoNavigationBar = extendsIntoNavigationBar,
         )
     }
 }

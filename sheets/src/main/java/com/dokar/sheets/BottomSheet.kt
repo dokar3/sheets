@@ -253,7 +253,7 @@ fun BottomSheetLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .run {
-                    if (behaviors.fitsSystemWindows) {
+                    if (!behaviors.extendsIntoStatusBar) {
                         windowInsetsPadding(WindowInsets.statusBars)
                     } else {
                         this
@@ -364,7 +364,7 @@ fun BottomSheetLayout(
                         .fillMaxWidth()
                         .background(backgroundColor, shape = shape)
                         .run {
-                            if (behaviors.fitsSystemWindows) {
+                            if (!behaviors.extendsIntoNavigationBar) {
                                 windowInsetsPadding(WindowInsets.navigationBars)
                             } else {
                                 this
