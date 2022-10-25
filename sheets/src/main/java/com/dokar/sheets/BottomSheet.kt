@@ -62,8 +62,8 @@ import kotlin.math.min
  * @param backgroundColor Background color for sheet content.
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
- * @param behaviors Dialog sheet behaviors.
- * @param dragHandle Bottom sheet drag handle.
+ * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
 @Composable
@@ -174,7 +174,7 @@ fun BottomSheetLayout(
     backgroundColor: Color = MaterialTheme.colors.surface,
     dimColor: Color = Color.Black,
     maxDimAmount: Float = BottomSheetDefaults.MaxDimAmount,
-    behaviors: SheetBehaviors = BottomSheetDefaults.sheetBehavior(),
+    behaviors: SheetBehaviors = SheetBehaviors(),
     dragHandle: @Composable () -> Unit = { DragHandle() },
     content: @Composable () -> Unit
 ) {

@@ -8,14 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.SecureFlagPolicy
 
 object BottomSheetDefaults {
-    const val MaxDimAmount = 0.45f
+    internal const val MaxDimAmount = 0.45f
 
     internal const val CollapseAnimDuration = 275
-
-    @Composable
-    private fun shouldSetLightNavBarByDefault(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && MaterialTheme.colors.isLight
-    }
 
     @Composable
     fun dialogSheetBehaviors(
@@ -26,7 +21,8 @@ object BottomSheetDefaults {
         dialogSecurePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
         dialogWindowSoftInputMode: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
         lightStatusBar: Boolean = false,
-        lightNavigationBar: Boolean = shouldSetLightNavBarByDefault(),
+        lightNavigationBar: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                MaterialTheme.colors.isLight,
         statusBarColor: Color = Color.Transparent,
         navigationBarColor: Color = if (lightNavigationBar) Color.Transparent else Color.Black,
     ): DialogSheetBehaviors {
@@ -41,20 +37,6 @@ object BottomSheetDefaults {
             lightNavigationBar = lightNavigationBar,
             statusBarColor = statusBarColor,
             navigationBarColor = navigationBarColor,
-        )
-    }
-
-    fun sheetBehavior(
-        collapseOnBackPress: Boolean = true,
-        collapseOnClickOutside: Boolean = true,
-        extendsIntoStatusBar: Boolean = false,
-        extendsIntoNavigationBar: Boolean = false,
-    ): SheetBehaviors {
-        return SheetBehaviors(
-            collapseOnBackPress = collapseOnBackPress,
-            collapseOnClickOutside = collapseOnClickOutside,
-            extendsIntoStatusBar = extendsIntoStatusBar,
-            extendsIntoNavigationBar = extendsIntoNavigationBar,
         )
     }
 }

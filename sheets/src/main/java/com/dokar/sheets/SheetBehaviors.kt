@@ -7,8 +7,8 @@ import androidx.compose.ui.window.SecureFlagPolicy
 
 @Immutable
 class DialogSheetBehaviors(
-    collapseOnBackPress: Boolean,
-    collapseOnClickOutside: Boolean,
+    collapseOnBackPress: Boolean = true,
+    collapseOnClickOutside: Boolean = true,
     extendsIntoStatusBar: Boolean = false,
     extendsIntoNavigationBar: Boolean = false,
     val dialogSecurePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
@@ -54,10 +54,10 @@ class DialogSheetBehaviors(
 
 @Immutable
 open class SheetBehaviors(
-    val collapseOnBackPress: Boolean,
-    val collapseOnClickOutside: Boolean,
-    val extendsIntoStatusBar: Boolean,
-    val extendsIntoNavigationBar: Boolean,
+    val collapseOnBackPress: Boolean = true,
+    val collapseOnClickOutside: Boolean = true,
+    val extendsIntoStatusBar: Boolean = false,
+    val extendsIntoNavigationBar: Boolean = false,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
