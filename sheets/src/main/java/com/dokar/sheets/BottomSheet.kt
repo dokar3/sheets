@@ -196,6 +196,8 @@ fun BottomSheetLayout(
 
     val sheetLayoutState = rememberSheetContentLayoutState()
 
+    val topInset = WindowInsets.Companion.statusBars
+
     SideEffect {
         state.peekHeight = peekHeight
         state.forceSkipPeek = skipPeek
@@ -244,7 +246,7 @@ fun BottomSheetLayout(
             )
             .detectPointerPositionChanges(
                 key = state,
-                onDown = { gestureDownPos = it },
+                onDown = { gestureDownPos = it.copy(y = it.y - topInset.getTop(density)) },
                 onPositionChanged = { state.addVelocity(it.y) },
                 onGestureEnd = { state.resetVelocity() },
             ),
@@ -319,6 +321,7 @@ fun BottomSheetLayout(
                             }
                             return@SheetContentLayout offsetY
                         }
+
                         BottomSheetValue.Peek -> {
                             val offsetY = if (isAnimating) {
                                 size.height
@@ -349,6 +352,7 @@ fun BottomSheetLayout(
                             }
                             return@SheetContentLayout offsetY
                         }
+
                         BottomSheetValue.Collapsed -> {
                             val offsetY = size.height
                             coroutineScope.launch {
