@@ -8,8 +8,10 @@ Another BottomSheet in Jetpack Compose.
 
 **Features**:
 
-
-- Independent. Unlike [`ModalBottomSheetLayout`](https://developer.android.com/reference/kotlin/androidx/compose/material/package-summary#ModalBottomSheetLayout(kotlin.Function1,androidx.compose.ui.Modifier,androidx.compose.material.ModalBottomSheetState,androidx.compose.ui.graphics.Shape,androidx.compose.ui.unit.Dp,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,kotlin.Function0)) , this bottom sheet will be displayed in a dialog window, which means we can easily create and display multiple sheets in the same composable:
+- Independent.
+  Unlike [`ModalBottomSheetLayout`](https://developer.android.com/reference/kotlin/androidx/compose/material/package-summary#ModalBottomSheetLayout(kotlin.Function1,androidx.compose.ui.Modifier,androidx.compose.material.ModalBottomSheetState,androidx.compose.ui.graphics.Shape,androidx.compose.ui.unit.Dp,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,kotlin.Function0))
+  , this bottom sheet will be displayed in a dialog window, which means we can easily create and
+  display multiple sheets in the same composable:
 
   ```kotlin
   @Composable
@@ -22,11 +24,11 @@ Another BottomSheet in Jetpack Compose.
       Column {    
           Button(onClick = { scope.launch { sheet1.expand() } }) {
               Text("Sheet 1")
-        }
+          }
   
           Button(onClick = { scope.launch { sheet2.expand() } }) {
               Text("Sheet 2")
-        }
+          }
       }
   
       BottomSheet(state = sheet1) { ... }
@@ -35,7 +37,7 @@ Another BottomSheet in Jetpack Compose.
   ```
 
 
-- Peek state support:
+- Peek support:
 
   ```kotlin
   val state = rememberBottomSheetState()
@@ -50,21 +52,24 @@ Another BottomSheet in Jetpack Compose.
       ...
   }
   
+  // In some callback
   state.peek()
   ```
 
 
-- Customizable animation spec:
+- Customizable animations:
 
   ```kotlin
   val state = rememberBottomSheetState()
   
+  // In some callback
   state.expand(animationSpec = spring())
   ```
 
-# Quick start
+# Usages
 
-Add the dependency [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets):
+Add the
+dependency [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets):
 
 ```groovy
 implementation "io.github.dokar3:sheets:latest_version"
@@ -85,13 +90,13 @@ BottomSheet(state = state) {
 }
 ```
 
-**Skip peek state**
+**Skip the peeked state**
 
 ```kotlin
 BottomSheet(
     state = state,
-    skipPeek = true,
-) { 
+    skipPeeked = true,
+) {
     ...
 }
 ```
@@ -102,8 +107,8 @@ To embed the sheet in the current layout hierarchy, use the `BottomSheetLayout()
 
 ```kotlin
 Box {
-    OtherContent()
-    
+    MainContent()
+
     val state = rememberBottomSheetState()
     if (state.visible) {
         BottomSheetLayout(state = state) {
