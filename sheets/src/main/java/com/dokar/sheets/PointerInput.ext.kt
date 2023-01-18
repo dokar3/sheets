@@ -9,7 +9,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.util.fastFirstOrNull
 import kotlinx.coroutines.coroutineScope
 
-fun Modifier.detectPointerPositionChanges(
+internal fun Modifier.detectPointerPositionChanges(
     key: Any?,
     onPositionChanged: (Offset) -> Unit,
     onDown: ((Offset) -> Unit)? = null,
