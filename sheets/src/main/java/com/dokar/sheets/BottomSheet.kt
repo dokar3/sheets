@@ -260,9 +260,11 @@ fun BottomSheetLayout(
             )
             .detectPointerPositionChanges(
                 key = state,
-                onDown = { gestureDownPos = it.copy(y = it.y - topInset.getTop(density)) },
+                onDown = {
+                    state.resetVelocity()
+                    gestureDownPos = it.copy(y = it.y - topInset.getTop(density))
+                },
                 onPositionChanged = { state.addVelocity(it.y) },
-                onGestureEnd = { state.resetVelocity() },
             ),
     ) {
         Box(
