@@ -39,7 +39,7 @@ internal class SheetNestedScrollConnection(
             state.onDragStopped()
         }
         val shouldConsumeFling = preSheetValue != BottomSheetValue.Expanded ||
-                state.value == BottomSheetValue.Peek
+                state.value == BottomSheetValue.Peeked
         return if (shouldConsumeFling) {
             available
         } else {

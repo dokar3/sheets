@@ -230,7 +230,7 @@ class BottomSheetState(
     ) {
         peekAnimationSpec = animationSpec
         visible = true
-        setValue(BottomSheetValue.Peek, animate, animationSpec)
+        setValue(BottomSheetValue.Peeked, animate, animationSpec)
         dragVelocity = 0f
     }
 
@@ -251,7 +251,7 @@ class BottomSheetState(
                 AnimState.Expanding
             }
 
-            BottomSheetValue.Peek -> {
+            BottomSheetValue.Peeked -> {
                 AnimState.Peeking
             }
 
@@ -275,7 +275,7 @@ class BottomSheetState(
                 AnimValues(offsetY = 0f, dimAmount = maxDimAmount)
             }
 
-            BottomSheetValue.Peek -> {
+            BottomSheetValue.Peeked -> {
                 val peekHeightPx = getPeekHeightInPx()
                 val offsetY = contentHeight.toFloat() - peekHeightPx
                 val dim = peekHeightPx / contentHeight.toFloat() * maxDimAmount
@@ -359,7 +359,7 @@ class BottomSheetState(
                     collapse()
                 }
 
-                BottomSheetValue.Peek -> {
+                BottomSheetValue.Peeked -> {
                     peek(animationSpec = spring())
                 }
             }
@@ -385,9 +385,9 @@ class BottomSheetState(
                         return BottomSheetValue.Collapsed
                     }
                 } else {
-                    return BottomSheetValue.Peek
+                    return BottomSheetValue.Peeked
                 }
-            } else if (value == BottomSheetValue.Peek) {
+            } else if (value == BottomSheetValue.Peeked) {
                 return BottomSheetValue.Collapsed
             }
         }
@@ -410,7 +410,7 @@ class BottomSheetState(
         val peekBottom = peekCy + peekHeightPx / 2.5f
 
         if (offsetYAnimatable.value in peekTop..peekBottom) {
-            return BottomSheetValue.Peek
+            return BottomSheetValue.Peeked
         }
 
         if (offsetYAnimatable.value < peekTop) {
@@ -463,8 +463,8 @@ class BottomSheetState(
                     BottomSheetValue.Expanded
                 }
 
-                BottomSheetValue.Peek -> {
-                    BottomSheetValue.Peek
+                BottomSheetValue.Peeked -> {
+                    BottomSheetValue.Peeked
                 }
 
                 BottomSheetValue.Collapsed -> {

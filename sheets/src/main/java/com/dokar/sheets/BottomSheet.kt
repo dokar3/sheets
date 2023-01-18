@@ -336,7 +336,7 @@ fun BottomSheetLayout(
                             return@SheetContentLayout offsetY
                         }
 
-                        BottomSheetValue.Peek -> {
+                        BottomSheetValue.Peeked -> {
                             val offsetY = if (isAnimating) {
                                 size.height
                             } else {
