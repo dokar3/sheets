@@ -57,7 +57,7 @@ import kotlin.math.min
  *
  * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
  * @param modifier Modifier for bottom sheet content.
- * @param skipPeek Skip the peek state if set to true. Defaults to false.
+ * @param skipPeeked Skip the peeked state if set to true. Defaults to false.
  * @param peekHeight Peek height, could be a dp, px, or fraction value.
  * @param backgroundColor Background color for sheet content.
  * @param dimColor Dim color. Defaults to [Color.Black].
@@ -70,7 +70,7 @@ import kotlin.math.min
 fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
-    skipPeek: Boolean = false,
+    skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
     shape: Shape = MaterialTheme.shapes.medium.copy(
         bottomStart = CornerSize(0.dp),
@@ -91,7 +91,7 @@ fun BottomSheet(
     val scope = rememberCoroutineScope()
 
     val currentState by rememberUpdatedState(state)
-    val currentSkipPeek by rememberUpdatedState(skipPeek)
+    val currentSkipPeek by rememberUpdatedState(skipPeeked)
     val currentPeekHeight by rememberUpdatedState(peekHeight)
     val currentShape by rememberUpdatedState(shape)
     val currentBackgroundColor by rememberUpdatedState(backgroundColor)
@@ -106,7 +106,7 @@ fun BottomSheet(
         DialogWrapper(
             onDismissRequest = {
                 if (state.value == BottomSheetValue.Expanded
-                    && !state.shouldSkipPeekState()
+                    && !state.shouldSkipPeekedState()
                     && !state.isPeeking
                 ) {
                     scope.launch {
@@ -128,7 +128,7 @@ fun BottomSheet(
                 BottomSheetLayout(
                     state = currentState,
                     modifier = modifier,
-                    skipPeek = currentSkipPeek,
+                    skipPeeked = currentSkipPeek,
                     peekHeight = currentPeekHeight,
                     shape = currentShape,
                     backgroundColor = currentBackgroundColor,
@@ -166,7 +166,7 @@ fun BottomSheet(
  *
  * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
  * @param modifier Modifier for bottom sheet content.
- * @param skipPeek Skip the peek state if set to true. Defaults to false.
+ * @param skipPeeked Skip the peeked state if set to true. Defaults to false.
  * @param peekHeight Peek height, could be a dp, px, or fraction value.
  * @param backgroundColor Background color for sheet content.
  * @param dimColor Dim color. Defaults to [Color.Black].
@@ -179,7 +179,7 @@ fun BottomSheet(
 fun BottomSheetLayout(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
-    skipPeek: Boolean = false,
+    skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
     shape: Shape = MaterialTheme.shapes.medium.copy(
         bottomStart = CornerSize(0.dp),
@@ -214,7 +214,7 @@ fun BottomSheetLayout(
 
     SideEffect {
         state.peekHeight = peekHeight
-        state.forceSkipPeek = skipPeek
+        state.forceSkipPeeked = skipPeeked
         state.maxDimAmount = maxDimAmount
     }
 

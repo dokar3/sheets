@@ -79,7 +79,7 @@ class BottomSheetState(
 
     internal lateinit var peekHeight: PeekHeight
 
-    internal var forceSkipPeek: Boolean = false
+    internal var forceSkipPeeked: Boolean = false
 
     private var pendingToStartAnimation = false
 
@@ -377,7 +377,7 @@ class BottomSheetState(
 
         if (dragVelocity >= 1000f) {
             if (value == BottomSheetValue.Expanded || isExpanding) {
-                if (shouldSkipPeekState()) {
+                if (shouldSkipPeekedState()) {
                     val shouldCollapse = dy >= swipeToDismissDy ||
                             dy > swipeToDismissDy * 0.7f && dragVelocity >= 2000f ||
                             dy > swipeToDismissDy * 0.5f && dragVelocity >= 3000f
@@ -396,7 +396,7 @@ class BottomSheetState(
             return BottomSheetValue.Expanded
         }
 
-        if (shouldSkipPeekState()) {
+        if (shouldSkipPeekedState()) {
             return if (offsetYAnimatable.value >= swipeToDismissDy) {
                 BottomSheetValue.Collapsed
             } else {
@@ -420,11 +420,11 @@ class BottomSheetState(
         return BottomSheetValue.Collapsed
     }
 
-    internal fun shouldSkipPeekState(): Boolean {
+    internal fun shouldSkipPeekedState(): Boolean {
         if (contentHeight == 0 || !::peekHeight.isInitialized) {
             return false
         }
-        return forceSkipPeek || getPeekHeightInPx() >= contentHeight
+        return forceSkipPeeked || getPeekHeightInPx() >= contentHeight
     }
 
     internal fun getPeekHeightInPx(): Float {

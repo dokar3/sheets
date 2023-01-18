@@ -148,7 +148,7 @@ fun SimpleBottomSheet(
     BottomSheet(
         state = state,
         modifier = modifier,
-        skipPeek = true,
+        skipPeeked = true,
     ) {
         SimpleSheetContent(state)
     }
@@ -205,7 +205,7 @@ private fun TextFieldBottomSheet(
     BottomSheet(
         state = state,
         modifier = modifier,
-        skipPeek = true,
+        skipPeeked = true,
     ) {
         TextFieldSheetContent(state = state)
     }
@@ -220,7 +220,7 @@ private fun EmbeddedBottomSheet(
         BottomSheetLayout(
             state = state,
             modifier = modifier,
-            skipPeek = true,
+            skipPeeked = true,
         ) {
             Box(
                 modifier = Modifier
