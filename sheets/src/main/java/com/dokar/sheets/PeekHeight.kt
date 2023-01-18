@@ -12,42 +12,14 @@ import androidx.compose.ui.unit.dp
  * or use constructors directly.
  */
 @Immutable
-sealed class PeekHeight {
+sealed interface PeekHeight {
     @Immutable
-    class Px(val value: Int) : PeekHeight() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Px
-
-            if (value != other.value) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return value
-        }
-    }
+    @JvmInline
+    value class Px(val value: Int) : PeekHeight
 
     @Immutable
-    class Fraction(val value: Float) : PeekHeight() {
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Fraction
-
-            if (value != other.value) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return value.hashCode()
-        }
-    }
+    @JvmInline
+    value class Fraction(val value: Float) : PeekHeight
 
     companion object {
         fun px(value: Int): PeekHeight = Px(value)
