@@ -11,10 +11,10 @@ internal class SheetNestedScrollConnection(
     private val state: BottomSheetState,
     private val scope: CoroutineScope
 ) : NestedScrollConnection {
-    private var preScrollValue: BottomSheetValue? = null
+    private var preSheetValue: BottomSheetValue? = null
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        preScrollValue = state.value
+        preSheetValue = state.value
         return if (source == NestedScrollSource.Drag && available.y < 0f) {
             onScroll(available)
         } else {
@@ -38,7 +38,7 @@ internal class SheetNestedScrollConnection(
         if (!state.isAnimating && state.offsetY != 0f) {
             state.onDragStopped()
         }
-        val shouldConsumeFling = preScrollValue != BottomSheetValue.Expanded ||
+        val shouldConsumeFling = preSheetValue != BottomSheetValue.Expanded ||
                 state.value == BottomSheetValue.Peek
         return if (shouldConsumeFling) {
             available
