@@ -80,7 +80,7 @@ fun BottomSheet(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = BottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = BottomSheetDefaults.dialogSheetBehaviors(),
-    dragHandle: @Composable () -> Unit = { DragHandle() },
+    dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
     if (!state.visible) {
@@ -189,7 +189,7 @@ fun BottomSheetLayout(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = BottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
-    dragHandle: @Composable () -> Unit = { DragHandle() },
+    dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()

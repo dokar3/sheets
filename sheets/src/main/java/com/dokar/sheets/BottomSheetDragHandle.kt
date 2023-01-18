@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
  * A bottom sheet drag handle will be displayed as a rounded rectangle.
  */
 @Composable
-fun DragHandle(
+fun BottomSheetDragHandle(
     modifier: Modifier = Modifier,
     height: Dp = 24.dp,
     barWidth: Dp = 32.dp,
