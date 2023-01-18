@@ -5,6 +5,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
+/**
+ * The height of a sheet when it's fully peeked, could be pixels or friction.
+ *
+ * To create a peek height, use [PeekHeight.px], [PeekHeight.dp], [PeekHeight.fraction]
+ * or use constructors directly.
+ */
 @Immutable
 sealed class PeekHeight {
     @Immutable

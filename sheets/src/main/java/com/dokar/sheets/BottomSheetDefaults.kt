@@ -7,10 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.SecureFlagPolicy
 
+/**
+ * Default values used by [BottomSheet] and [BottomSheetLayout].
+ */
 object BottomSheetDefaults {
-    internal const val MaxDimAmount = 0.45f
-
-    internal const val CollapseAnimDuration = 275
+    const val MaxDimAmount = 0.45f
 
     @Composable
     fun dialogSheetBehaviors(

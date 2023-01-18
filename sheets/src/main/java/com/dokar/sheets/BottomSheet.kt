@@ -53,7 +53,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * The bottom sheet that will be displayed in a dialog window.
+ * A bottom sheet will be displayed in a dialog window.
  *
  * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
  * @param modifier Modifier for bottom sheet content.
@@ -161,6 +161,20 @@ fun BottomSheet(
     }
 }
 
+/**
+ * A bottom sheet layout will be embedded in the composable directly.
+ *
+ * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
+ * @param modifier Modifier for bottom sheet content.
+ * @param skipPeek Skip the peek state if set to true. Defaults to false.
+ * @param peekHeight Peek height, could be a dp, px, or fraction value.
+ * @param backgroundColor Background color for sheet content.
+ * @param dimColor Dim color. Defaults to [Color.Black].
+ * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
+ * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
+ * @param content Sheet content.
+ */
 @Composable
 fun BottomSheetLayout(
     state: BottomSheetState,

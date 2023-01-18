@@ -5,6 +5,10 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.SecureFlagPolicy
 
+/**
+ * The behaviors of the dialog sheet, for the [BottomSheet]. This includes some extra
+ * properties to control the dialog window.
+ */
 @Immutable
 class DialogSheetBehaviors(
     collapseOnBackPress: Boolean = true,
@@ -52,6 +56,9 @@ class DialogSheetBehaviors(
     }
 }
 
+/**
+ * Basic behaviors of the sheet, for the [SheetContentLayout].
+ */
 @Immutable
 open class SheetBehaviors(
     val collapseOnBackPress: Boolean = true,

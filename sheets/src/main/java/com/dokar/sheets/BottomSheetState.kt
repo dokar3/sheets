@@ -21,6 +21,11 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 
+/**
+ * Create and remember a [BottomSheetState].
+ *
+ * @param initialValue The initial value of the sheet state.
+ */
 @Composable
 fun rememberBottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
@@ -38,10 +43,17 @@ fun rememberBottomSheetState(
     }
 }
 
+/**
+ *  Provides the access to the bottom sheet states ([visible], [value], etc) and the
+ *  ability to manually change the [value] by calling [peek], [expand] and [collapse].
+ */
 @Stable
 class BottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
 ) {
+    /**
+     * The visible state of the sheet.
+     */
     var visible by mutableStateOf(initialValue != BottomSheetValue.Collapsed)
         internal set
 
@@ -81,17 +93,33 @@ class BottomSheetState(
 
     private val velocityTracker = VelocityTracker()
 
+    /**
+     * The current value of the sheet.
+     */
     var value by mutableStateOf(initialValue)
         private set
 
     private var animState by mutableStateOf(AnimState.None)
 
+    /**
+     * Be true if the sheet is peeking.
+     */
     val isPeeking: Boolean get() = animState == AnimState.Peeking
 
+    /**
+     * Be true if the sheet is expanding.
+     */
     val isExpanding: Boolean get() = animState == AnimState.Expanding
 
+    /**
+     * Be true if the sheet is collapsing.
+     */
     val isCollapsing: Boolean get() = animState == AnimState.Collapsing
 
+    /**
+     * The drag progress value of the sheet. Be 0.0 if the sheet is
+     * invisible, and be 1.0 if it's fully expanded.
+     */
     val dragProgress: Float
         get() {
             return if (contentHeight != 0) {
@@ -159,6 +187,12 @@ class BottomSheetState(
         }
     }
 
+    /**
+     * Collapse the sheet.
+     *
+     * @param animate Set to false to disable the animation.
+     * @param animationSpec The [AnimationSpec] of the animation.
+     */
     suspend fun collapse(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float> = collapseTween(),
@@ -168,6 +202,12 @@ class BottomSheetState(
         dragVelocity = 0f
     }
 
+    /**
+     * Expand the sheet.
+     *
+     * @param animate Set to false to disable the animation.
+     * @param animationSpec The [AnimationSpec] of the animation.
+     */
     suspend fun expand(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float> = spring(dampingRatio = 0.85f, stiffness = 370f),
@@ -178,6 +218,12 @@ class BottomSheetState(
         dragVelocity = 0f
     }
 
+    /**
+     * Peek the sheet.
+     *
+     * @param animate Set to false to disable the animation.
+     * @param animationSpec The [AnimationSpec] of the animation.
+     */
     suspend fun peek(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float> = spring(dampingRatio = 0.85f, stiffness = 370f)
@@ -189,7 +235,7 @@ class BottomSheetState(
     }
 
     private fun collapseTween(): AnimationSpec<Float> {
-        val duration = BottomSheetDefaults.CollapseAnimDuration
+        val duration = CollapseAnimDuration
         val velocityFactor = (abs(dragVelocity) / 25000f).coerceIn(0f, 1f)
         val newDuration = (duration - duration * 0.7f * velocityFactor).toInt()
         return tween(durationMillis = newDuration)
@@ -204,9 +250,11 @@ class BottomSheetState(
             BottomSheetValue.Expanded -> {
                 AnimState.Expanding
             }
+
             BottomSheetValue.Peek -> {
                 AnimState.Peeking
             }
+
             BottomSheetValue.Collapsed -> {
                 AnimState.Collapsing
             }
@@ -226,12 +274,14 @@ class BottomSheetState(
             BottomSheetValue.Expanded -> {
                 AnimValues(offsetY = 0f, dimAmount = maxDimAmount)
             }
+
             BottomSheetValue.Peek -> {
                 val peekHeightPx = getPeekHeightInPx()
                 val offsetY = contentHeight.toFloat() - peekHeightPx
                 val dim = peekHeightPx / contentHeight.toFloat() * maxDimAmount
                 AnimValues(offsetY = offsetY, dimAmount = dim)
             }
+
             BottomSheetValue.Collapsed -> {
                 AnimValues(offsetY = contentHeight.toFloat(), dimAmount = 0f)
             }
@@ -304,9 +354,11 @@ class BottomSheetState(
                 BottomSheetValue.Expanded -> {
                     expand(animationSpec = spring())
                 }
+
                 BottomSheetValue.Collapsed -> {
                     collapse()
                 }
+
                 BottomSheetValue.Peek -> {
                     peek(animationSpec = spring())
                 }
@@ -383,6 +435,7 @@ class BottomSheetState(
             is PeekHeight.Px -> {
                 height.value.coerceIn(0, contentHeight).toFloat()
             }
+
             is PeekHeight.Fraction -> {
                 height.value.coerceIn(0f, 1f) * contentHeight
             }
@@ -402,14 +455,18 @@ class BottomSheetState(
     }
 
     companion object {
+        private const val CollapseAnimDuration = 275
+
         internal fun save(state: BottomSheetState): Any {
             return when (state.value) {
                 BottomSheetValue.Expanded -> {
                     BottomSheetValue.Expanded
                 }
+
                 BottomSheetValue.Peek -> {
                     BottomSheetValue.Peek
                 }
+
                 BottomSheetValue.Collapsed -> {
                     BottomSheetValue.Collapsed
                 }
