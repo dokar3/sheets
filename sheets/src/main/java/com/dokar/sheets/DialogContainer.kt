@@ -166,6 +166,7 @@ internal class DialogWrapper(
         return
     }
 
+    @Deprecated("")
     override fun onBackPressed() {
         if (behaviors.collapseOnBackPress) {
             onDismissRequest()
