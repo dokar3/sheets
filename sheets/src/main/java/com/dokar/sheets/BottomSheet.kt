@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -102,24 +103,31 @@ fun BottomSheet(
     val currentContent by rememberUpdatedState(content)
     val dialogId = rememberSaveable { UUID.randomUUID() }
 
+    val layoutDirection = LocalLayoutDirection.current
+
+    val onDismissRequest: () -> Unit = remember(state) {
+        {
+            if (state.value == BottomSheetValue.Expanded
+                && !state.shouldSkipPeekedState()
+                && !state.isPeeking
+            ) {
+                scope.launch {
+                    state.peek()
+                }
+            } else if (state.value != BottomSheetValue.Collapsed) {
+                scope.launch {
+                    state.collapse()
+                }
+            }
+        }
+    }
+
     val dialog = remember(view, state) {
         DialogWrapper(
-            onDismissRequest = {
-                if (state.value == BottomSheetValue.Expanded
-                    && !state.shouldSkipPeekedState()
-                    && !state.isPeeking
-                ) {
-                    scope.launch {
-                        state.peek()
-                    }
-                } else if (state.value != BottomSheetValue.Collapsed) {
-                    scope.launch {
-                        state.collapse()
-                    }
-                }
-            },
+            onDismissRequest = onDismissRequest,
             behaviors = behaviors,
             composeView = view,
+            layoutDirection = layoutDirection,
             dialogId = dialogId,
         )
     }.apply {
@@ -142,10 +150,6 @@ fun BottomSheet(
         }
     }
 
-    LaunchedEffect(behaviors) {
-        dialog.updateParameters(behaviors)
-    }
-
     LaunchedEffect(state.visible, dialog.isShowing) {
         if (state.visible && !dialog.isShowing) {
             dialog.show()
@@ -158,6 +162,14 @@ fun BottomSheet(
             dialog.dismiss()
             dialog.disposeComposition()
         }
+    }
+
+    SideEffect {
+        dialog.updateParameters(
+            onDismissRequest = onDismissRequest,
+            behaviors = behaviors,
+            layoutDirection = layoutDirection
+        )
     }
 }
 
