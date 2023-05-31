@@ -93,7 +93,7 @@ internal class DialogWrapper(
         sheetLayout = SheetLayout(context, window).apply {
             // Set unique id for AbstractComposeView. This allows state restoration for the state
             // defined inside the Dialog via rememberSaveable()
-            setTag(R.id.compose_view_saveable_id_tag, "SheetDialog:$dialogId")
+            setTag(androidx.compose.ui.R.id.compose_view_saveable_id_tag, "SheetDialog:$dialogId")
             clipChildren = false
         }
 

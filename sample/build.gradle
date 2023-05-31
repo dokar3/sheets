@@ -4,8 +4,10 @@ plugins {
 }
 
 android {
+    namespace 'com.dokar.sheets.sample'
+
     compileSdk compile_sdk
-    buildToolsVersion "30.0.3"
+    buildToolsVersion = "30.0.3"
 
     defaultConfig {
         applicationId "com.dokar.sheets.sample"

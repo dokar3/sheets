@@ -5,8 +5,10 @@ plugins {
 }
 
 android {
+    namespace 'com.dokar.sheets'
+
     compileSdk compile_sdk
-    buildToolsVersion "30.0.3"
+    buildToolsVersion = "30.0.3"
 
     defaultConfig {
         minSdk 21
