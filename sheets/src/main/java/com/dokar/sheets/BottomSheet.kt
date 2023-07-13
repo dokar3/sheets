@@ -274,7 +274,8 @@ fun BottomSheetLayout(
                 key = state,
                 onDown = {
                     state.resetVelocity()
-                    gestureDownPos = it.copy(y = it.y - topInset.getTop(density))
+                    gestureDownPos =
+                        it.copy(y = it.y - topInset.getTop(density))
                 },
                 onPositionChanged = { state.addVelocity(it.y) },
             ),
@@ -299,7 +300,10 @@ fun BottomSheetLayout(
                         .fillMaxWidth()
                         .height(36.dp)
                         .align(Alignment.BottomCenter)
-                        .background(MaterialTheme.colors.surface)
+                        .background(
+                            color = backgroundColor,
+                            shape = shape,
+                        )
                 )
             }
 
@@ -326,7 +330,10 @@ fun BottomSheetLayout(
                                 0
                             }
                             coroutineScope.launch {
-                                state.setOffsetY(offsetY, updateDimAmount = !isAnimating)
+                                state.setOffsetY(
+                                    offsetY,
+                                    updateDimAmount = !isAnimating
+                                )
                                 if (isAnimating) {
                                     val animSpec = state.expandAnimationSpec
                                     if (animSpec != null) {
@@ -357,7 +364,10 @@ fun BottomSheetLayout(
                                 size.height - state.getPeekHeightInPx().toInt()
                             }
                             coroutineScope.launch {
-                                state.setOffsetY(offsetY, updateDimAmount = !isAnimating)
+                                state.setOffsetY(
+                                    offsetY,
+                                    updateDimAmount = !isAnimating
+                                )
                                 if (isAnimating) {
                                     val animSpec = state.peekAnimationSpec
                                     if (animSpec != null) {
