@@ -4,6 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,10 +19,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -38,13 +43,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetLayout
 import com.dokar.sheets.BottomSheetState
 import com.dokar.sheets.PeekHeight
 import com.dokar.sheets.rememberBottomSheetState
 import com.dokar.sheets.sample.theme.ComposeBottomSheetTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import androidx.compose.material3.MaterialTheme as M3Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,33 +63,64 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun App() {
     var dark by remember { mutableStateOf(false) }
-    ComposeBottomSheetTheme(darkTheme = dark) {
-        val window = (LocalContext.current as Activity).window
-        val backgroundColor = MaterialTheme.colors.background
-        val view = LocalView.current
-        LaunchedEffect(dark, backgroundColor) {
-            window.statusBarColor = backgroundColor.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !dark
+
+    val window = (LocalContext.current as Activity).window
+    val backgroundColor = if (dark) Color(0xff121212) else Color.White
+    val view = LocalView.current
+    LaunchedEffect(dark, backgroundColor) {
+        window.statusBarColor = backgroundColor.toArgb()
+        WindowCompat.getInsetsController(
+            window,
+            view
+        ).isAppearanceLightStatusBars = !dark
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            ComposeBottomSheetTheme(darkTheme = dark) {
+                Surface(color = backgroundColor) {
+                    Sheets()
+                }
+            }
+
+            M3Theme(
+                colorScheme = if (dark) {
+                    darkColorScheme()
+                } else {
+                    lightColorScheme()
+                },
+            ) {
+                androidx.compose.material3.Surface(
+                    color = backgroundColor,
+                    contentColor = contentColorFor(
+                        M3Theme.colorScheme.background
+                    ),
+                ) {
+                    M3Sheets()
+                }
+            }
         }
 
-        Surface(color = MaterialTheme.colors.background) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Dark")
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Switch(
-                        checked = dark,
-                        onCheckedChange = { dark = it }
-                    )
-                }
-
-                Sheets(modifier = Modifier.align(Alignment.Center))
-            }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Dark", color = if (dark) Color.White else Color.Black)
+            Spacer(modifier = Modifier.width(4.dp))
+            Switch(
+                checked = dark,
+                onCheckedChange = { dark = it }
+            )
         }
     }
 }
@@ -97,7 +133,6 @@ private fun Sheets(modifier: Modifier = Modifier) {
     val listSheetState = rememberBottomSheetState()
     val intentPickerSheetState = rememberBottomSheetState()
     val editSheetState = rememberBottomSheetState()
-    val embeddedSheetState = rememberBottomSheetState()
 
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -123,10 +158,6 @@ private fun Sheets(modifier: Modifier = Modifier) {
         Button(onClick = { scope.launch { editSheetState.expand() } }) {
             Text("Text fields")
         }
-
-        Button(onClick = { scope.launch { embeddedSheetState.expand() } }) {
-            Text("Embedded")
-        }
     }
 
     SimpleBottomSheet(state = simpleSheetState)
@@ -136,8 +167,25 @@ private fun Sheets(modifier: Modifier = Modifier) {
     IntentPickerBottomSheet(state = intentPickerSheetState)
 
     TextFieldBottomSheet(state = editSheetState)
+}
 
-    EmbeddedBottomSheet(state = embeddedSheetState)
+@Composable
+private fun M3Sheets(modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
+
+    val md3SimpleSheetState = rememberBottomSheetState()
+
+    Column(modifier = modifier) {
+        androidx.compose.material3.Button(
+            onClick = { scope.launch { md3SimpleSheetState.expand() } }
+        ) {
+            androidx.compose.material3.Text("Material 3")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    Md3SimpleBottomSheet(state = md3SimpleSheetState)
 }
 
 @Composable
@@ -151,6 +199,21 @@ fun SimpleBottomSheet(
         skipPeeked = true,
     ) {
         SimpleSheetContent(state)
+    }
+}
+
+
+@Composable
+fun Md3SimpleBottomSheet(
+    state: BottomSheetState,
+    modifier: Modifier = Modifier
+) {
+    com.dokar.sheets.m3.BottomSheet(
+        state = state,
+        modifier = modifier,
+        skipPeeked = true,
+    ) {
+        M3SimpleSheetContent(state)
     }
 }
 
@@ -208,29 +271,6 @@ private fun TextFieldBottomSheet(
         skipPeeked = true,
     ) {
         TextFieldSheetContent(state = state)
-    }
-}
-
-@Composable
-private fun EmbeddedBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier,
-) {
-    if (state.visible) {
-        BottomSheetLayout(
-            state = state,
-            modifier = modifier,
-            skipPeeked = true,
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Sheet content")
-            }
-        }
     }
 }
 

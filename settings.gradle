@@ -7,4 +7,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Sheets"
 include ':sample'
+include ':sheets-core'
 include ':sheets'
+include ':sheets-m3'

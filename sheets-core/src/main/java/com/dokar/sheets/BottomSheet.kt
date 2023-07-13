@@ -17,8 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -68,20 +67,17 @@ import kotlin.math.min
  * @param content Sheet content.
  */
 @Composable
-fun BottomSheet(
+fun CoreBottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
     skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
-    shape: Shape = MaterialTheme.shapes.medium.copy(
-        bottomStart = CornerSize(0.dp),
-        bottomEnd = CornerSize(0.dp)
-    ),
-    backgroundColor: Color = MaterialTheme.colors.surface,
+    shape: Shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+    backgroundColor: Color = Color.White,
     dimColor: Color = Color.Black,
-    maxDimAmount: Float = BottomSheetDefaults.MaxDimAmount,
-    behaviors: DialogSheetBehaviors = BottomSheetDefaults.dialogSheetBehaviors(),
-    dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
+    maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
+    behaviors: DialogSheetBehaviors = CoreBottomSheetDefaults.dialogSheetBehaviors(),
+    dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
     if (!state.visible) {
@@ -133,7 +129,7 @@ fun BottomSheet(
     }.apply {
         setContent(composition) {
             DialogLayout {
-                BottomSheetLayout(
+                CoreBottomSheetLayout(
                     state = currentState,
                     modifier = modifier,
                     skipPeeked = currentSkipPeek,
@@ -188,20 +184,17 @@ fun BottomSheet(
  * @param content Sheet content.
  */
 @Composable
-fun BottomSheetLayout(
+fun CoreBottomSheetLayout(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
     skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
-    shape: Shape = MaterialTheme.shapes.medium.copy(
-        bottomStart = CornerSize(0.dp),
-        bottomEnd = CornerSize(0.dp)
-    ),
-    backgroundColor: Color = MaterialTheme.colors.surface,
+    shape: Shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+    backgroundColor: Color = Color.White,
     dimColor: Color = Color.Black,
-    maxDimAmount: Float = BottomSheetDefaults.MaxDimAmount,
+    maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
-    dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
+    dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -274,7 +267,8 @@ fun BottomSheetLayout(
                 key = state,
                 onDown = {
                     state.resetVelocity()
-                    gestureDownPos = it.copy(y = it.y - topInset.getTop(density))
+                    gestureDownPos =
+                        it.copy(y = it.y - topInset.getTop(density))
                 },
                 onPositionChanged = { state.addVelocity(it.y) },
             ),
@@ -299,7 +293,10 @@ fun BottomSheetLayout(
                         .fillMaxWidth()
                         .height(36.dp)
                         .align(Alignment.BottomCenter)
-                        .background(MaterialTheme.colors.surface)
+                        .background(
+                            color = backgroundColor,
+                            shape = shape,
+                        )
                 )
             }
 
@@ -326,7 +323,10 @@ fun BottomSheetLayout(
                                 0
                             }
                             coroutineScope.launch {
-                                state.setOffsetY(offsetY, updateDimAmount = !isAnimating)
+                                state.setOffsetY(
+                                    offsetY,
+                                    updateDimAmount = !isAnimating
+                                )
                                 if (isAnimating) {
                                     val animSpec = state.expandAnimationSpec
                                     if (animSpec != null) {
@@ -357,7 +357,10 @@ fun BottomSheetLayout(
                                 size.height - state.getPeekHeightInPx().toInt()
                             }
                             coroutineScope.launch {
-                                state.setOffsetY(offsetY, updateDimAmount = !isAnimating)
+                                state.setOffsetY(
+                                    offsetY,
+                                    updateDimAmount = !isAnimating
+                                )
                                 if (isAnimating) {
                                     val animSpec = state.peekAnimationSpec
                                     if (animSpec != null) {

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.dokar.sheets'
+    namespace 'com.dokar.sheets.m3'
 
     compileSdk compile_sdk
     buildToolsVersion = "30.0.3"
@@ -43,7 +43,7 @@ dependencies {
     api project(":sheets-core")
 
     implementation platform("androidx.compose:compose-bom:$compose_bom_version")
-    implementation "androidx.compose.material:material"
+    implementation "androidx.compose.material3:material3"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
