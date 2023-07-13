@@ -40,10 +40,13 @@ android {
 }
 
 dependencies {
-    api project(":sheets-core")
 
     implementation platform("androidx.compose:compose-bom:$compose_bom_version")
-    implementation "androidx.compose.material:material"
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.ui:ui-util"
+    implementation "androidx.compose.foundation:foundation"
+
+    implementation 'androidx.activity:activity-compose:1.7.2'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

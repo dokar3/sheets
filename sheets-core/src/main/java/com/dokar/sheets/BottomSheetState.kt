@@ -59,7 +59,7 @@ class BottomSheetState(
 
     internal var contentHeight by mutableStateOf(0)
 
-    internal var maxDimAmount = BottomSheetDefaults.MaxDimAmount
+    internal var maxDimAmount = CoreBottomSheetDefaults.MaxDimAmount
 
     internal var dimAmount by mutableStateOf(0f)
 

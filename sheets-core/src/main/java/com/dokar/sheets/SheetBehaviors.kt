@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.SecureFlagPolicy
 
 /**
- * The behaviors of the dialog sheet, for the [BottomSheet]. This includes some extra
- * properties to control the dialog window.
+ * The behaviors of the dialog sheet, for the bottom sheet. This includes some
+ * extra properties to control the dialog window.
  */
 @Immutable
 class DialogSheetBehaviors(

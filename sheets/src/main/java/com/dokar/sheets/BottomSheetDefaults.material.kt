@@ -11,8 +11,6 @@ import androidx.compose.ui.window.SecureFlagPolicy
  * Default values used by [BottomSheet] and [BottomSheetLayout].
  */
 object BottomSheetDefaults {
-    const val MaxDimAmount = 0.45f
-
     @Composable
     fun dialogSheetBehaviors(
         collapseOnBackPress: Boolean = true,

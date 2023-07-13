@@ -90,6 +90,15 @@ BottomSheet(state = state) {
 }
 ```
 
+**Material 3**
+```diff
+- implementation "io.github.dokar3:sheets:latest_version"
++ implementation "io.github.dokar3:sheets-m3:latest_version"
+
+- import com.dokar.sheets.BottomSheet
++ import com.dokar.sheets.m3.BottomSheet
+```
+
 **Skip the peeked state**
 
 ```kotlin
