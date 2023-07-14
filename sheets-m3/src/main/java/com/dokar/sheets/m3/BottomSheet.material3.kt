@@ -1,12 +1,9 @@
 package com.dokar.sheets.m3
 
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import com.dokar.sheets.BottomSheetState
 import com.dokar.sheets.CoreBottomSheet
 import com.dokar.sheets.CoreBottomSheetDefaults
@@ -36,11 +33,8 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
-    shape: Shape = MaterialTheme.shapes.medium.copy(
-        bottomStart = CornerSize(0.dp),
-        bottomEnd = CornerSize(0.dp)
-    ),
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    shape: Shape = BottomSheetDefaults.shape,
+    backgroundColor: Color = BottomSheetDefaults.backgroundColor,
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = BottomSheetDefaults.dialogSheetBehaviors(),
@@ -82,11 +76,8 @@ fun BottomSheetLayout(
     modifier: Modifier = Modifier,
     skipPeeked: Boolean = false,
     peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
-    shape: Shape = MaterialTheme.shapes.medium.copy(
-        bottomStart = CornerSize(0.dp),
-        bottomEnd = CornerSize(0.dp)
-    ),
-    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    shape: Shape = BottomSheetDefaults.shape,
+    backgroundColor: Color = BottomSheetDefaults.backgroundColor,
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
