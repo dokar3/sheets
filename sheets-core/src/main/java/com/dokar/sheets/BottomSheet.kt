@@ -225,12 +225,17 @@ fun CoreBottomSheetLayout(
     }
 
     LaunchedEffect(state) {
-        snapshotFlow { state.value }
-            .map { it == BottomSheetValue.Collapsed }
-            .distinctUntilChanged()
-            .collect {
-                contentAlpha.snapTo(0f)
-            }
+        launch {
+            snapshotFlow { state.value }
+                .distinctUntilChanged()
+                .filter { it == BottomSheetValue.Collapsed }
+                .collect { contentAlpha.snapTo(0f) }
+        }
+        launch {
+            snapshotFlow { state.isAnimating }
+                .filter { it }
+                .collect { contentAlpha.snapTo(1f) }
+        }
     }
 
     DisposableEffect(state) {
