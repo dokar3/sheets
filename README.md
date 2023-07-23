@@ -110,6 +110,20 @@ BottomSheet(
 }
 ```
 
+**Intercept state (value)**
+
+```kotlin
+val state = rememberBottomSheetState(
+    confirmValueChange = {
+        if (it == BottomSheetValue.Collapsed) {
+            // Intercept logic
+        } else {
+            true
+        }
+    },
+)
+```
+
 **Embedded sheet**
 
 To embed the sheet in the current layout hierarchy, use the `BottomSheetLayout()`:
