@@ -54,10 +54,11 @@ fun IntentPickerSheetContent(
     var showAsGrid by remember { mutableStateOf(false) }
 
     val intent = remember {
-        Intent(Intent.ACTION_SEND).apply {
+        val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, "Hello there")
         }
+        intent
     }
 
     PickerLayoutStyleTab(

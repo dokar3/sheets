@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -207,7 +208,7 @@ fun CoreBottomSheetLayout(
 
     val density = LocalDensity.current
 
-    val initialOffsetY = remember { with(density) { 180.dp.toPx() } }
+    val initialOffsetY = with(density) { 180.dp.toPx() }
 
     val contentAlpha = remember(state) { Animatable(0f) }
 
@@ -224,12 +225,17 @@ fun CoreBottomSheetLayout(
     }
 
     LaunchedEffect(state) {
-        snapshotFlow { state.value }
-            .map { it == BottomSheetValue.Collapsed }
-            .distinctUntilChanged()
-            .collect {
-                contentAlpha.snapTo(0f)
-            }
+        launch {
+            snapshotFlow { state.value }
+                .distinctUntilChanged()
+                .filter { it == BottomSheetValue.Collapsed }
+                .collect { contentAlpha.snapTo(0f) }
+        }
+        launch {
+            snapshotFlow { state.isAnimating }
+                .filter { it }
+                .collect { contentAlpha.snapTo(1f) }
+        }
     }
 
     DisposableEffect(state) {
@@ -237,7 +243,7 @@ fun CoreBottomSheetLayout(
             state.visible = false
             state.contentHeight = 0
             coroutineScope.launch {
-                state.stopAnimation()
+                state.stopAnimations()
             }
         }
     }
