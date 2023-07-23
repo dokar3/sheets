@@ -1,6 +1,5 @@
 package com.dokar.sheets
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.spring
@@ -9,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -22,14 +22,23 @@ import kotlin.math.abs
 import kotlin.math.max
 
 /**
+ * Callback for confirming the next bottom sheet value (state).
+ */
+typealias ConfirmValueChange = (value: BottomSheetValue) -> Boolean
+
+/**
  * Create and remember a [BottomSheetState].
  *
  * @param initialValue The initial value of the sheet state.
+ * @param confirmValueChange Callback for confirming the next bottom sheet
+ * value. Return false to prevent the sheet from going to the next state.
  */
 @Composable
 fun rememberBottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
+    confirmValueChange: ConfirmValueChange = { true },
 ): BottomSheetState {
+    val currentOnConfirmNextValue = rememberUpdatedState(confirmValueChange)
     return rememberSaveable(
         inputs = emptyArray(),
         saver = Saver(
@@ -39,6 +48,7 @@ fun rememberBottomSheetState(
     ) {
         BottomSheetState(
             initialValue = initialValue,
+            confirmValueChange = currentOnConfirmNextValue.value,
         )
     }
 }
@@ -50,6 +60,7 @@ fun rememberBottomSheetState(
 @Stable
 class BottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
+    private val confirmValueChange: ConfirmValueChange = { true },
 ) {
     /**
      * The visible state of the sheet.
@@ -198,13 +209,19 @@ class BottomSheetState(
         animationSpec: AnimationSpec<Float> = collapseTween(),
     ) {
         stopAnimations()
+        val expectedNextValue = BottomSheetValue.Collapsed
+        val nextValue = if (confirmValueChange(expectedNextValue)) {
+            expectedNextValue
+        } else {
+            this.value
+        }
         setValueJob = setValue(
-            BottomSheetValue.Collapsed,
+            nextValue,
             animate,
             animationSpec,
         ).also {
             it.invokeOnCompletion { cause ->
-                if (cause == null) {
+                if (cause == null && nextValue == expectedNextValue) {
                     visible = false
                     dragVelocity = 0f
                 }
@@ -228,14 +245,19 @@ class BottomSheetState(
         stopAnimations()
         expandAnimationSpec = animationSpec
         visible = true
+        val expectedNextValue = BottomSheetValue.Expanded
+        val nextValue = if (confirmValueChange(expectedNextValue)) {
+            expectedNextValue
+        } else {
+            this.value
+        }
         setValueJob = setValue(
-            BottomSheetValue.Expanded,
+            nextValue,
             animate,
             animationSpec
         ).also {
             it.invokeOnCompletion { cause ->
-                Log.d("Sheet", "content height: $contentHeight, offY: ${offsetY}")
-                if (cause == null) {
+                if (cause == null && nextValue == expectedNextValue) {
                     dragVelocity = 0f
                 }
             }
@@ -258,13 +280,19 @@ class BottomSheetState(
         stopAnimations()
         peekAnimationSpec = animationSpec
         visible = true
+        val expectedNextValue = BottomSheetValue.Peeked
+        val nextValue = if (confirmValueChange(expectedNextValue)) {
+            expectedNextValue
+        } else {
+            this.value
+        }
         setValueJob = setValue(
-            BottomSheetValue.Peeked,
+            nextValue,
             animate,
             animationSpec
         ).also {
             it.invokeOnCompletion { cause ->
-                if (cause == null) {
+                if (cause == null && nextValue == expectedNextValue) {
                     dragVelocity = 0f
                 }
             }
