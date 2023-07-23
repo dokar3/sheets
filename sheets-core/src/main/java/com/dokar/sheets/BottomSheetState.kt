@@ -1,5 +1,6 @@
 package com.dokar.sheets
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.spring
@@ -11,12 +12,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
@@ -69,9 +69,7 @@ class BottomSheetState(
 
     internal var swipeToDismissDy by mutableStateOf(0f)
 
-    private var dimAnim: Job? = null
-
-    private var dragYAnim: Job? = null
+    private var setValueJob: Job? = null
 
     internal var expandAnimationSpec: AnimationSpec<Float>? = null
 
@@ -123,7 +121,10 @@ class BottomSheetState(
     val dragProgress: Float
         get() {
             return if (contentHeight != 0) {
-                ((contentHeight - offsetYAnimatable.value) / contentHeight).coerceIn(0f, 1f)
+                ((contentHeight - offsetYAnimatable.value) / contentHeight).coerceIn(
+                    0f,
+                    1f
+                )
             } else {
                 0f
             }
@@ -149,7 +150,7 @@ class BottomSheetState(
         y: Float,
         updateDimAmount: Boolean = true,
     ) {
-        stopAnimation()
+        offsetYAnimatable.stop()
         offsetYAnimatable.snapTo(max(0f, y))
         if (updateDimAmount) {
             updateDimAmount()
@@ -179,9 +180,8 @@ class BottomSheetState(
         return velocityTracker.calculateVelocity().y
     }
 
-    internal suspend fun stopAnimation() {
-        dragYAnim?.cancel()
-        dimAnim?.cancel()
+    internal suspend fun stopAnimations() {
+        setValueJob?.cancel()
         if (offsetYAnimatable.isRunning) {
             offsetYAnimatable.stop()
         }
@@ -197,9 +197,19 @@ class BottomSheetState(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float> = collapseTween(),
     ) {
-        setValue(BottomSheetValue.Collapsed, animate, animationSpec)
-        visible = false
-        dragVelocity = 0f
+        stopAnimations()
+        setValueJob = setValue(
+            BottomSheetValue.Collapsed,
+            animate,
+            animationSpec,
+        ).also {
+            it.invokeOnCompletion { cause ->
+                if (cause == null) {
+                    visible = false
+                    dragVelocity = 0f
+                }
+            }
+        }
     }
 
     /**
@@ -210,12 +220,26 @@ class BottomSheetState(
      */
     suspend fun expand(
         animate: Boolean = true,
-        animationSpec: AnimationSpec<Float> = spring(dampingRatio = 0.85f, stiffness = 370f),
+        animationSpec: AnimationSpec<Float> = spring(
+            dampingRatio = 0.85f,
+            stiffness = 370f
+        ),
     ) {
+        stopAnimations()
         expandAnimationSpec = animationSpec
         visible = true
-        setValue(BottomSheetValue.Expanded, animate, animationSpec)
-        dragVelocity = 0f
+        setValueJob = setValue(
+            BottomSheetValue.Expanded,
+            animate,
+            animationSpec
+        ).also {
+            it.invokeOnCompletion { cause ->
+                Log.d("Sheet", "content height: $contentHeight, offY: ${offsetY}")
+                if (cause == null) {
+                    dragVelocity = 0f
+                }
+            }
+        }
     }
 
     /**
@@ -226,12 +250,25 @@ class BottomSheetState(
      */
     suspend fun peek(
         animate: Boolean = true,
-        animationSpec: AnimationSpec<Float> = spring(dampingRatio = 0.85f, stiffness = 370f)
+        animationSpec: AnimationSpec<Float> = spring(
+            dampingRatio = 0.85f,
+            stiffness = 370f
+        )
     ) {
+        stopAnimations()
         peekAnimationSpec = animationSpec
         visible = true
-        setValue(BottomSheetValue.Peeked, animate, animationSpec)
-        dragVelocity = 0f
+        setValueJob = setValue(
+            BottomSheetValue.Peeked,
+            animate,
+            animationSpec
+        ).also {
+            it.invokeOnCompletion { cause ->
+                if (cause == null) {
+                    dragVelocity = 0f
+                }
+            }
+        }
     }
 
     private fun collapseTween(): AnimationSpec<Float> {
@@ -245,7 +282,7 @@ class BottomSheetState(
         value: BottomSheetValue,
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float>
-    ) {
+    ): Job {
         this.animState = when (value) {
             BottomSheetValue.Expanded -> {
                 AnimState.Expanding
@@ -259,14 +296,18 @@ class BottomSheetState(
                 AnimState.Collapsing
             }
         }
-        stopAnimation()
-        if (animate) {
-            animateToValue(value, animationSpec)
-        } else {
-            jumpToValue(value)
+        return coroutineScope {
+            launch {
+                if (animate) {
+                    animateToValue(value, animationSpec)
+                } else {
+                    jumpToValue(value)
+                }
+
+                this@BottomSheetState.animState = AnimState.None
+                this@BottomSheetState.value = value
+            }
         }
-        this.animState = AnimState.None
-        this.value = value
     }
 
     private fun calcTargetAnimValues(value: BottomSheetValue): AnimValues {
@@ -311,36 +352,26 @@ class BottomSheetState(
 
         val targetAnimValues = calcTargetAnimValues(newValue)
 
-        val dragY = launch {
+        val dragY = async {
             offsetYAnimatable.animateTo(
                 targetValue = targetAnimValues.offsetY,
                 initialVelocity = initialVelocity,
                 animationSpec = animationSpec
             )
+            true
         }
 
-        val dimAmount = launch {
-            val animatable = Animatable(dimAmount)
-            launch {
-                snapshotFlow { animatable.value }
-                    .distinctUntilChanged()
-                    .collect {
-                        dimAmount = it.coerceIn(0f, 1f)
-                    }
-            }
-            animatable.animateTo(
+        val dimAmount = async {
+            Animatable(dimAmount).animateTo(
                 targetValue = targetAnimValues.dimAmount,
                 animationSpec = animationSpec,
-            )
+            ) {
+                dimAmount = value.coerceIn(0f, 1f)
+            }
         }
 
-        dragYAnim = dragY
-
-        dragY.join()
+        dragY.await()
         dimAmount.cancel()
-
-        dimAnim = null
-        dragYAnim = null
     }
 
     private suspend fun jumpToValue(newValue: BottomSheetValue) {
