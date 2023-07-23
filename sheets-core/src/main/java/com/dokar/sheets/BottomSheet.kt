@@ -208,7 +208,7 @@ fun CoreBottomSheetLayout(
 
     val density = LocalDensity.current
 
-    val initialOffsetY = remember { with(density) { 180.dp.toPx() } }
+    val initialOffsetY = with(density) { 180.dp.toPx() }
 
     val contentAlpha = remember(state) { Animatable(0f) }
 
