@@ -64,19 +64,11 @@ val state = rememberBottomSheetState(
 
 ### Material 2 and Material 3
 
-Mateiral 2:
-
 ```kotlin
-implementation("io.github.dokar3:sheets:latest_version")
-
+// Material 2:
 import com.dokar.sheets.BottomSheet
-```
 
-Material 3:
-
-```kotlin
-implementation("io.github.dokar3:sheets-m3:latest_version")
-
+// Material 3:
 import com.dokar.sheets.m3.BottomSheet
 ```
 
@@ -96,6 +88,20 @@ Box {
         }
     }
 }
+```
+
+# Usage
+
+### Material 2
+
+```kotlin
+implementation("io.github.dokar3:sheets:latest_version")
+```
+
+### Material 3
+
+```kotlin
+implementation("io.github.dokar3:sheets-m3:latest_version")
 ```
 
 # License
