@@ -6,13 +6,14 @@ buildscript {
         kotlin_version = '1.9.0'
         compile_sdk = 33
         target_sdk = 33
+        build_tools_version = "33.0.1"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath 'com.android.tools.build:gradle:8.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.25.3'
