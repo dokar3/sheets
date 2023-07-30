@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets)
 
-Another BottomSheet in Jetpack Compose.
+Another rich-feature BottomSheet in Jetpack Compose.
 
 <a href="images/screenshot_simple.png"><img src="images/screenshot_simple.png" width="32%"/></a>
 <a href="images/screenshot_list.png"><img src="images/screenshot_list.png" width="32%"/></a>
@@ -87,6 +87,34 @@ Box {
             ...
         }
     }
+}
+```
+
+### Listenable drag progress
+
+It's useful when syncing some transitions with the drag gesture.
+
+```kotlin
+fun Modifier.iosBottomSheetTransitions(
+    state: BottomSheetState,
+    statusBarInsets: WindowInsets,
+): Modifier = graphicsLayer {
+    val progress = (state.dragProgress - 0.5f) / 0.5f
+    if (progress <= 0f) {
+        return@graphicsLayer
+    }
+
+    val scale = 1f - 0.1f * progress
+    scaleX = scale
+    scaleY = scale
+
+    val statusBarHeight = statusBarInsets.getTop(this)
+    val scaledTopSpacing = size.height * 0.1f / 2f
+    translationY = progress * (statusBarHeight +
+            16.dp.toPx() - scaledTopSpacing)
+
+    clip = true
+    shape = RoundedCornerShape(progress * 16.dp)
 }
 ```
 
