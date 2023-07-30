@@ -27,7 +27,7 @@ Another rich-feature BottomSheet in Jetpack Compose.
   ```
 
 
-### Peek support:
+### Peek support
 
   ```kotlin
   BottomSheet(
@@ -43,8 +43,14 @@ Another rich-feature BottomSheet in Jetpack Compose.
 ### Customizable animations
 
   ```kotlin
-  // In some callback
+  // Animation off
+  state.expand(animated = false)
+
+  // Default
   state.expand(animationSpec = spring())
+
+  // Slow animation
+  state.expand(animationSpec = tween(durationMillis = 2000))
   ```
 
 
