@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets)
 
-Another rich-feature BottomSheet in Jetpack Compose.
+Another feature-rich bottom sheet in Jetpack Compose.
 
 <a href="images/screenshot_simple.png"><img src="images/screenshot_simple.png" width="32%"/></a>
 <a href="images/screenshot_list.png"><img src="images/screenshot_list.png" width="32%"/></a>
@@ -69,6 +69,8 @@ val state = rememberBottomSheetState(
 ```
 
 ### Material 2 and Material 3
+
+Migration is simple, just change the imports.
 
 ```kotlin
 // Material 2:
