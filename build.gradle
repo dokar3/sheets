@@ -1,11 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        compose_bom_version = '2023.06.01'
-        compose_compiler_version = '1.5.0'
+        compose_bom_version = '2023.08.00'
+        compose_compiler_version = '1.5.1'
         kotlin_version = '1.9.0'
-        compile_sdk = 33
-        target_sdk = 33
+        compile_sdk = 34
+        target_sdk = 34
         build_tools_version = "33.0.1"
     }
     repositories {
