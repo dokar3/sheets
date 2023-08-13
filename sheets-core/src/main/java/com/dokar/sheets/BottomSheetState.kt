@@ -7,6 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
@@ -68,17 +70,17 @@ class BottomSheetState(
     var visible by mutableStateOf(initialValue != BottomSheetValue.Collapsed)
         internal set
 
-    internal var contentHeight by mutableStateOf(0)
+    internal var contentHeight by mutableIntStateOf(0)
 
     internal var maxDimAmount = CoreBottomSheetDefaults.MaxDimAmount
 
-    internal var dimAmount by mutableStateOf(0f)
+    internal var dimAmount by mutableFloatStateOf(0f)
 
     private val offsetYAnimatable = Animatable(0f)
 
     internal val offsetY by offsetYAnimatable.asState()
 
-    internal var swipeToDismissDy by mutableStateOf(0f)
+    internal var swipeToDismissDy by mutableFloatStateOf(0f)
 
     private var setValueJob: Job? = null
 
