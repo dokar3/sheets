@@ -34,6 +34,7 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.dokar.sheets.core.R
 import java.util.UUID
 
 @Suppress("ViewConstructor")
@@ -51,7 +52,10 @@ internal class SheetLayout(
         content()
     }
 
-    fun setContent(parent: CompositionContext, content: @Composable () -> Unit) {
+    fun setContent(
+        parent: CompositionContext,
+        content: @Composable () -> Unit
+    ) {
         setParentCompositionContext(parent)
         this.content = content
         shouldCreateCompositionOnAttachedToWindow = true
@@ -66,7 +70,8 @@ internal class DialogWrapper(
     private val composeView: View,
     layoutDirection: LayoutDirection,
     dialogId: UUID,
-) : ComponentDialog(composeView.context, R.style.DialogWindowTheme), ViewRootForInspector {
+) : ComponentDialog(composeView.context, R.style.DialogWindowTheme),
+    ViewRootForInspector {
     private val sheetLayout: SheetLayout
 
     override val subCompositionView: AbstractComposeView get() = sheetLayout
@@ -84,7 +89,10 @@ internal class DialogWrapper(
             // translucent status bar.
             window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         }
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        window.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
 
         val edgeToEdgeFlags = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -93,7 +101,10 @@ internal class DialogWrapper(
         sheetLayout = SheetLayout(context, window).apply {
             // Set unique id for AbstractComposeView. This allows state restoration for the state
             // defined inside the Dialog via rememberSaveable()
-            setTag(androidx.compose.ui.R.id.compose_view_saveable_id_tag, "SheetDialog:$dialogId")
+            setTag(
+                androidx.compose.ui.R.id.compose_view_saveable_id_tag,
+                "SheetDialog:$dialogId"
+            )
             clipChildren = false
         }
 
@@ -133,7 +144,10 @@ internal class DialogWrapper(
         }
     }
 
-    fun setContent(parentComposition: CompositionContext, children: @Composable () -> Unit) {
+    fun setContent(
+        parentComposition: CompositionContext,
+        children: @Composable () -> Unit
+    ) {
         sheetLayout.setContent(parentComposition, children)
     }
 
@@ -181,10 +195,13 @@ internal class DialogWrapper(
             statusBarColor = behaviors.statusBarColor.toArgb()
             navigationBarColor = behaviors.navigationBarColor.toArgb()
 
-            WindowCompat.getInsetsController(this, decorView).let { controller ->
-                controller.isAppearanceLightStatusBars = behaviors.lightStatusBar
-                controller.isAppearanceLightNavigationBars = behaviors.lightNavigationBar
-            }
+            WindowCompat.getInsetsController(this, decorView)
+                .let { controller ->
+                    controller.isAppearanceLightStatusBars =
+                        behaviors.lightStatusBar
+                    controller.isAppearanceLightNavigationBars =
+                        behaviors.lightNavigationBar
+                }
         }
     }
 
@@ -224,8 +241,10 @@ internal fun DialogLayout(
         modifier = modifier
     ) { measurables, constraints ->
         val placeables = measurables.fastMap { it.measure(constraints) }
-        val width = placeables.fastMaxBy { it.width }?.width ?: constraints.minWidth
-        val height = placeables.fastMaxBy { it.height }?.height ?: constraints.minHeight
+        val width =
+            placeables.fastMaxBy { it.width }?.width ?: constraints.minWidth
+        val height =
+            placeables.fastMaxBy { it.height }?.height ?: constraints.minHeight
         layout(width, height) {
             placeables.fastForEach { it.placeRelative(0, 0) }
         }
