@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.dokar.sheets'
+    namespace 'com.dokar.sheets.core'
 
     compileSdk compile_sdk
     buildToolsVersion = build_tools_version
