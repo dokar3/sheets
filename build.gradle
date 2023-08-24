@@ -3,7 +3,7 @@ buildscript {
     ext {
         compose_bom_version = '2023.08.00'
         compose_compiler_version = '1.5.1'
-        kotlin_version = '1.9.0'
+        kotlin_version = '1.9.10'
         compile_sdk = 34
         target_sdk = 34
         build_tools_version = "33.0.1"
