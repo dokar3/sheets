@@ -1,6 +1,7 @@
 package com.dokar.sheets
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -40,11 +43,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -63,6 +70,8 @@ import kotlin.math.min
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -77,6 +86,7 @@ fun CoreBottomSheet(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = CoreBottomSheetDefaults.dialogSheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -139,6 +149,7 @@ fun CoreBottomSheet(
                     dimColor = currentDimColor,
                     maxDimAmount = currentMaxDimAmount,
                     behaviors = currentProperties,
+                    contentAlignment = contentAlignment,
                     dragHandle = currentDragHandle,
                     content = currentContent
                 )
@@ -180,6 +191,8 @@ fun CoreBottomSheet(
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -194,6 +207,7 @@ fun CoreBottomSheetLayout(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -216,6 +230,8 @@ fun CoreBottomSheetLayout(
     val sheetLayoutState = rememberSheetContentLayoutState()
 
     val topInset = WindowInsets.Companion.statusBars
+
+    var contentWidth by remember { mutableIntStateOf(0) }
 
     SideEffect {
         state.peekHeight = peekHeight
@@ -288,116 +304,43 @@ fun CoreBottomSheetLayout(
                         this
                     }
                 }
-                .alpha(contentAlpha.value.coerceIn(0f, 1f))
+                .alpha(contentAlpha.value.coerceIn(0f, 1f)),
         ) {
             if (state.offsetY < 0f) {
                 // When a spring animation is running, sheet content may leave the bottom edge,
                 // so we show a background to cover the content behind the bottom sheet.
-                Spacer(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(36.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            color = backgroundColor,
-                            shape = shape,
-                        )
-                )
+                        .align(Alignment.BottomCenter),
+                    horizontalAlignment = contentAlignment,
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .width(with(density) { contentWidth.toDp() })
+                            .height(36.dp)
+                            .background(
+                                color = backgroundColor,
+                                shape = shape,
+                            )
+                    )
+                }
             }
 
             SheetContentLayout(
                 state = sheetLayoutState,
                 contentOffsetY = { size ->
-                    if (state.contentHeight == size.height) {
-                        return@SheetContentLayout state.offsetY.toInt()
-                    }
-
-                    state.swipeToDismissDy = min(
-                        size.height / 3f,
-                        with(density) { 160.dp.toPx() }
+                    contentWidth = size.width
+                    computeContentOffsetY(
+                        state = state,
+                        coroutineScope = coroutineScope,
+                        density = density,
+                        initialOffsetY = initialOffsetY,
+                        contentAlpha = contentAlpha,
+                        size = size,
                     )
-
-                    val isAnimating = state.isAnimating
-                    state.contentHeight = size.height
-
-                    when (state.value) {
-                        BottomSheetValue.Expanded -> {
-                            val offsetY = if (isAnimating) {
-                                min(size.height, initialOffsetY.toInt())
-                            } else {
-                                0
-                            }
-                            coroutineScope.launch {
-                                state.setOffsetY(
-                                    offsetY,
-                                    updateDimAmount = !isAnimating
-                                )
-                                if (isAnimating) {
-                                    val animSpec = state.expandAnimationSpec
-                                    if (animSpec != null) {
-                                        coroutineScope.launch {
-                                            contentAlpha.animateTo(
-                                                targetValue = 1f,
-                                                animationSpec = animSpec,
-                                            )
-                                        }
-                                        state.expand(animationSpec = animSpec)
-                                    } else {
-                                        coroutineScope.launch {
-                                            contentAlpha.animateTo(1f)
-                                        }
-                                        state.expand()
-                                    }
-                                } else {
-                                    contentAlpha.snapTo(1f)
-                                }
-                            }
-                            return@SheetContentLayout offsetY
-                        }
-
-                        BottomSheetValue.Peeked -> {
-                            val offsetY = if (isAnimating) {
-                                size.height
-                            } else {
-                                size.height - state.getPeekHeightInPx().toInt()
-                            }
-                            coroutineScope.launch {
-                                state.setOffsetY(
-                                    offsetY,
-                                    updateDimAmount = !isAnimating
-                                )
-                                if (isAnimating) {
-                                    val animSpec = state.peekAnimationSpec
-                                    if (animSpec != null) {
-                                        coroutineScope.launch {
-                                            contentAlpha.animateTo(
-                                                targetValue = 1f,
-                                                animationSpec = animSpec,
-                                            )
-                                        }
-                                        state.peek(animationSpec = animSpec)
-                                    } else {
-                                        coroutineScope.launch {
-                                            contentAlpha.snapTo(1f)
-                                        }
-                                        state.peek()
-                                    }
-                                } else {
-                                    contentAlpha.snapTo(1f)
-                                }
-                            }
-                            return@SheetContentLayout offsetY
-                        }
-
-                        BottomSheetValue.Collapsed -> {
-                            val offsetY = size.height
-                            coroutineScope.launch {
-                                state.addOffsetY(offsetY)
-                            }
-                            return@SheetContentLayout offsetY
-                        }
-                    }
                 },
+                alignment = contentAlignment,
             ) {
                 Column(
                     modifier = modifier
@@ -434,16 +377,130 @@ fun CoreBottomSheetLayout(
     }
 }
 
+private fun computeContentOffsetY(
+    state: BottomSheetState,
+    coroutineScope: CoroutineScope,
+    density: Density,
+    initialOffsetY: Float,
+    contentAlpha: Animatable<Float, AnimationVector1D>,
+    size: IntSize,
+): Int {
+    if (state.contentHeight == size.height) {
+        // The content height in the state is the latest height
+        return state.offsetY.toInt()
+    }
+
+    // Height updated
+
+    state.swipeToDismissDy = min(
+        size.height / 3f,
+        with(density) { 160.dp.toPx() }
+    )
+
+    val isAnimating = state.isAnimating
+    state.contentHeight = size.height
+
+    fun expand(offsetY: Int) = coroutineScope.launch {
+        state.setOffsetY(
+            offsetY,
+            updateDimAmount = !isAnimating
+        )
+        if (isAnimating) {
+            val animSpec = state.expandAnimationSpec
+            if (animSpec != null) {
+                coroutineScope.launch {
+                    contentAlpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = animSpec,
+                    )
+                }
+                state.expand(animationSpec = animSpec)
+            } else {
+                coroutineScope.launch {
+                    contentAlpha.animateTo(1f)
+                }
+                state.expand()
+            }
+        } else {
+            contentAlpha.snapTo(1f)
+        }
+    }
+
+    fun peek(offsetY: Int) = coroutineScope.launch {
+        state.setOffsetY(
+            offsetY,
+            updateDimAmount = !isAnimating
+        )
+        if (isAnimating) {
+            val animSpec = state.peekAnimationSpec
+            if (animSpec != null) {
+                coroutineScope.launch {
+                    contentAlpha.animateTo(
+                        targetValue = 1f,
+                        animationSpec = animSpec,
+                    )
+                }
+                state.peek(animationSpec = animSpec)
+            } else {
+                coroutineScope.launch {
+                    contentAlpha.snapTo(1f)
+                }
+                state.peek()
+            }
+        } else {
+            contentAlpha.snapTo(1f)
+        }
+    }
+
+    return when (state.value) {
+        BottomSheetValue.Expanded -> {
+            val offsetY = if (isAnimating) {
+                min(size.height, initialOffsetY.toInt())
+            } else {
+                0
+            }
+            expand(offsetY)
+            offsetY
+        }
+
+        BottomSheetValue.Peeked -> {
+            val offsetY = if (isAnimating) {
+                size.height
+            } else {
+                size.height - state.getPeekHeightInPx().toInt()
+            }
+            peek(offsetY)
+            offsetY
+        }
+
+        BottomSheetValue.Collapsed -> {
+            val offsetY = size.height
+            coroutineScope.launch { state.addOffsetY(offsetY) }
+            offsetY
+        }
+    }
+}
+
 @Composable
 private fun rememberSheetContentLayoutState(): SheetContentLayoutState {
     return remember { SheetContentLayoutState() }
 }
 
 private class SheetContentLayoutState {
+    var coordinates: LayoutCoordinates? = null
+
+    var contentX = 0
     var contentY = 0
 
     fun isWithinContentBounds(offset: Offset): Boolean {
-        return offset.y >= contentY
+        val coordinates = this.coordinates ?: return offset.y >= contentY
+        val offsetInRoot = coordinates.localToRoot(Offset.Zero)
+        val x = offset.x
+        val y = offset.y
+        return x >= offsetInRoot.x + contentX &&
+                x <= offsetInRoot.x + contentX + coordinates.size.width &&
+                y >= offsetInRoot.y + contentY &&
+                y <= offsetInRoot.y + contentY + coordinates.size.height
     }
 }
 
@@ -451,23 +508,30 @@ private class SheetContentLayoutState {
 private fun SheetContentLayout(
     modifier: Modifier = Modifier,
     state: SheetContentLayoutState = rememberSheetContentLayoutState(),
+    alignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     contentOffsetY: (IntSize) -> Int = { 0 },
     content: @Composable () -> Unit,
 ) {
     Layout(
         content = content,
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { state.coordinates = it },
     ) { measurables, constraints ->
         val placeable = measurables[0].measure(constraints)
 
         val width = max(constraints.minWidth, placeable.measuredWidth)
         val height = max(constraints.minHeight, placeable.measuredHeight)
 
-        layout(width = constraints.maxWidth, height = constraints.maxHeight) {
+        layout(width = width, height = constraints.maxHeight) {
             val offsetY = contentOffsetY(IntSize(width, height))
             val y = constraints.maxHeight - height + offsetY
+            val x = alignment.align(
+                size = width,
+                space = constraints.maxWidth,
+                layoutDirection = layoutDirection,
+            )
+            state.contentX = x
             state.contentY = y
-            placeable.placeRelative(x = 0, y = y)
+            placeable.placeRelative(x = x, y = y)
         }
     }
 }
