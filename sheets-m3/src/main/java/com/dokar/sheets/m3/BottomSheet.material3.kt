@@ -1,6 +1,7 @@
 package com.dokar.sheets.m3
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -24,6 +25,8 @@ import com.dokar.sheets.rememberBottomSheetState
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -38,6 +41,7 @@ fun BottomSheet(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = BottomSheetDefaults.dialogSheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -51,6 +55,7 @@ fun BottomSheet(
         dimColor = dimColor,
         maxDimAmount = maxDimAmount,
         behaviors = behaviors,
+        contentAlignment = contentAlignment,
         dragHandle = dragHandle,
         content = content,
     )
@@ -67,6 +72,8 @@ fun BottomSheet(
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -81,6 +88,7 @@ fun BottomSheetLayout(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { BottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -94,6 +102,7 @@ fun BottomSheetLayout(
         dimColor = dimColor,
         maxDimAmount = maxDimAmount,
         behaviors = behaviors,
+        contentAlignment = contentAlignment,
         dragHandle = dragHandle,
         content = content,
     )

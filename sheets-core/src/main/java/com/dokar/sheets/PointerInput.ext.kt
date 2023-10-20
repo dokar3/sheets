@@ -15,7 +15,7 @@ internal fun Modifier.detectPointerPositionChanges(
     onUp: (() -> Unit)? = null,
     onPositionChanged: (Offset) -> Unit,
 ): Modifier {
-    return pointerInput(key) {
+    return this.pointerInput(key) {
         coroutineScope {
             awaitEachGesture {
                 val down = awaitFirstDown(requireUnconsumed = false)

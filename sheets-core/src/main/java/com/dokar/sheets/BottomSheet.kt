@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -24,6 +25,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -41,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -66,6 +70,8 @@ import kotlin.math.min
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -80,6 +86,7 @@ fun CoreBottomSheet(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = CoreBottomSheetDefaults.dialogSheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -142,6 +149,7 @@ fun CoreBottomSheet(
                     dimColor = currentDimColor,
                     maxDimAmount = currentMaxDimAmount,
                     behaviors = currentProperties,
+                    contentAlignment = contentAlignment,
                     dragHandle = currentDragHandle,
                     content = currentContent
                 )
@@ -183,6 +191,8 @@ fun CoreBottomSheet(
  * @param dimColor Dim color. Defaults to [Color.Black].
  * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -197,6 +207,7 @@ fun CoreBottomSheetLayout(
     dimColor: Color = Color.Black,
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: SheetBehaviors = SheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -219,6 +230,8 @@ fun CoreBottomSheetLayout(
     val sheetLayoutState = rememberSheetContentLayoutState()
 
     val topInset = WindowInsets.Companion.statusBars
+
+    var contentWidth by remember { mutableIntStateOf(0) }
 
     SideEffect {
         state.peekHeight = peekHeight
@@ -291,26 +304,33 @@ fun CoreBottomSheetLayout(
                         this
                     }
                 }
-                .alpha(contentAlpha.value.coerceIn(0f, 1f))
+                .alpha(contentAlpha.value.coerceIn(0f, 1f)),
         ) {
             if (state.offsetY < 0f) {
                 // When a spring animation is running, sheet content may leave the bottom edge,
                 // so we show a background to cover the content behind the bottom sheet.
-                Spacer(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(36.dp)
-                        .align(Alignment.BottomCenter)
-                        .background(
-                            color = backgroundColor,
-                            shape = shape,
-                        )
-                )
+                        .align(Alignment.BottomCenter),
+                    horizontalAlignment = contentAlignment,
+                ) {
+                    Spacer(
+                        modifier = Modifier
+                            .width(with(density) { contentWidth.toDp() })
+                            .height(36.dp)
+                            .background(
+                                color = backgroundColor,
+                                shape = shape,
+                            )
+                    )
+                }
             }
 
             SheetContentLayout(
                 state = sheetLayoutState,
                 contentOffsetY = { size ->
+                    contentWidth = size.width
                     computeContentOffsetY(
                         state = state,
                         coroutineScope = coroutineScope,
@@ -320,6 +340,7 @@ fun CoreBottomSheetLayout(
                         size = size,
                     )
                 },
+                alignment = contentAlignment,
             ) {
                 Column(
                     modifier = modifier
@@ -466,10 +487,20 @@ private fun rememberSheetContentLayoutState(): SheetContentLayoutState {
 }
 
 private class SheetContentLayoutState {
+    var coordinates: LayoutCoordinates? = null
+
+    var contentX = 0
     var contentY = 0
 
     fun isWithinContentBounds(offset: Offset): Boolean {
-        return offset.y >= contentY
+        val coordinates = this.coordinates ?: return offset.y >= contentY
+        val offsetInRoot = coordinates.localToRoot(Offset.Zero)
+        val x = offset.x
+        val y = offset.y
+        return x >= offsetInRoot.x + contentX &&
+                x <= offsetInRoot.x + contentX + coordinates.size.width &&
+                y >= offsetInRoot.y + contentY &&
+                y <= offsetInRoot.y + contentY + coordinates.size.height
     }
 }
 
@@ -477,23 +508,30 @@ private class SheetContentLayoutState {
 private fun SheetContentLayout(
     modifier: Modifier = Modifier,
     state: SheetContentLayoutState = rememberSheetContentLayoutState(),
+    alignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     contentOffsetY: (IntSize) -> Int = { 0 },
     content: @Composable () -> Unit,
 ) {
     Layout(
         content = content,
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { state.coordinates = it },
     ) { measurables, constraints ->
         val placeable = measurables[0].measure(constraints)
 
         val width = max(constraints.minWidth, placeable.measuredWidth)
         val height = max(constraints.minHeight, placeable.measuredHeight)
 
-        layout(width = constraints.maxWidth, height = constraints.maxHeight) {
+        layout(width = width, height = constraints.maxHeight) {
             val offsetY = contentOffsetY(IntSize(width, height))
             val y = constraints.maxHeight - height + offsetY
+            val x = alignment.align(
+                size = width,
+                space = constraints.maxWidth,
+                layoutDirection = layoutDirection,
+            )
+            state.contentX = x
             state.contentY = y
-            placeable.placeRelative(x = 0, y = y)
+            placeable.placeRelative(x = x, y = y)
         }
     }
 }
