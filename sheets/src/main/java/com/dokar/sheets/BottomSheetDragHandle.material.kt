@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BottomSheetDragHandle(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onBackground.copy(
-        alpha = 0.1f
+    color: Color = MaterialTheme.colors.onSurface.copy(
+        alpha = 0.4f
     ),
     height: Dp = 24.dp,
     barWidth: Dp = 32.dp,

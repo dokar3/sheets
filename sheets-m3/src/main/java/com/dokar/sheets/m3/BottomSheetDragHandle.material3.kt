@@ -14,8 +14,8 @@ import com.dokar.sheets.CoreBottomSheetDragHandle
 @Composable
 fun BottomSheetDragHandle(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.onBackground.copy(
-        alpha = 0.1f
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+        alpha = 0.4f
     ),
     height: Dp = 24.dp,
     barWidth: Dp = 32.dp,
