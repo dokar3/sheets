@@ -1,5 +1,6 @@
 package com.dokar.sheets
 
+import android.view.WindowManager
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -72,6 +74,8 @@ import kotlin.math.min
  * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
  * @param contentAlignment The alignment of the content. Only works when the content width is
  * smaller than the screen width.
+ * @param showAboveKeyboard Controls whether the whole bottom sheet should show above the soft
+ * keyboard when the keyboard is shown. Defaults to false.
  * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
  * @param content Sheet content.
  */
@@ -87,6 +91,7 @@ fun CoreBottomSheet(
     maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
     behaviors: DialogSheetBehaviors = CoreBottomSheetDefaults.dialogSheetBehaviors(),
     contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    showAboveKeyboard: Boolean = false,
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
@@ -104,7 +109,6 @@ fun CoreBottomSheet(
     val currentBackgroundColor by rememberUpdatedState(backgroundColor)
     val currentDimColor by rememberUpdatedState(dimColor)
     val currentMaxDimAmount by rememberUpdatedState(maxDimAmount)
-    val currentProperties by rememberUpdatedState(behaviors)
     val currentDragHandle by rememberUpdatedState(dragHandle)
     val currentContent by rememberUpdatedState(content)
     val dialogId = rememberSaveable { UUID.randomUUID() }
@@ -128,10 +132,29 @@ fun CoreBottomSheet(
         }
     }
 
+    val (finalModifier, finalBehaviors) = remember(modifier, behaviors, showAboveKeyboard) {
+        if (showAboveKeyboard) {
+            @Suppress("DEPRECATION")
+            modifier.imePadding() to behaviors.copy(
+                dialogWindowSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
+            )
+        } else {
+            if (behaviors.dialogWindowSoftInputMode ==
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED
+            ) {
+                modifier to behaviors.copy(
+                    dialogWindowSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
+                )
+            } else {
+                modifier to behaviors
+            }
+        }
+    }
+
     val dialog = remember(view, state) {
         DialogWrapper(
             onDismissRequest = onDismissRequest,
-            behaviors = behaviors,
+            behaviors = finalBehaviors,
             composeView = view,
             layoutDirection = layoutDirection,
             dialogId = dialogId,
@@ -141,14 +164,14 @@ fun CoreBottomSheet(
             DialogLayout {
                 CoreBottomSheetLayout(
                     state = currentState,
-                    modifier = modifier,
+                    modifier = finalModifier,
                     skipPeeked = currentSkipPeek,
                     peekHeight = currentPeekHeight,
                     shape = currentShape,
                     backgroundColor = currentBackgroundColor,
                     dimColor = currentDimColor,
                     maxDimAmount = currentMaxDimAmount,
-                    behaviors = currentProperties,
+                    behaviors = finalBehaviors,
                     contentAlignment = contentAlignment,
                     dragHandle = currentDragHandle,
                     content = currentContent
@@ -174,7 +197,7 @@ fun CoreBottomSheet(
     SideEffect {
         dialog.updateParameters(
             onDismissRequest = onDismissRequest,
-            behaviors = behaviors,
+            behaviors = finalBehaviors,
             layoutDirection = layoutDirection
         )
     }

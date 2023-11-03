@@ -70,15 +70,10 @@ val state = rememberBottomSheetState(
 
 ### Whole sheet above the keyboard
 
-When the sheet needs to show above keyboard, combine the `SOFT_INPUT_ADJUST_RESIZE` with `imePadding()`:
-
 ```kotlin
 BottomSheet(
     state = state,
-    modifier = Modifier.imePadding(),
-    behaviors = DialogSheetBehaviors(
-        dialogWindowSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE,
-    ),
+    showAboveKeyboard = true,
 ) {
     TextFieldSheetContent()
 }

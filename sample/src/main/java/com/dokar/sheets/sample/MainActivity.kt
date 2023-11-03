@@ -265,12 +265,18 @@ private fun TextFieldBottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
 ) {
+    var showAboveKeyboard by remember { mutableStateOf(false) }
     BottomSheet(
         state = state,
         modifier = modifier,
         skipPeeked = true,
+        showAboveKeyboard = showAboveKeyboard,
     ) {
-        TextFieldSheetContent(state = state)
+        TextFieldSheetContent(
+            state = state,
+            showAboveKeyboard = showAboveKeyboard,
+            onShowAboveKeyboardChange = { showAboveKeyboard = it },
+        )
     }
 }
 
