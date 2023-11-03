@@ -27,6 +27,30 @@ class DialogSheetBehaviors(
     extendsIntoStatusBar = extendsIntoStatusBar,
     extendsIntoNavigationBar = extendsIntoNavigationBar,
 ) {
+    fun copy(
+        collapseOnBackPress: Boolean = this.collapseOnBackPress,
+        collapseOnClickOutside: Boolean = this.collapseOnClickOutside,
+        extendsIntoStatusBar: Boolean = this.extendsIntoStatusBar,
+        extendsIntoNavigationBar: Boolean = this.extendsIntoNavigationBar,
+        dialogSecurePolicy: SecureFlagPolicy = this.dialogSecurePolicy,
+        dialogWindowSoftInputMode: Int = this.dialogWindowSoftInputMode,
+        lightStatusBar: Boolean = this.lightStatusBar,
+        lightNavigationBar: Boolean = this.lightNavigationBar,
+        statusBarColor: Color = this.statusBarColor,
+        navigationBarColor: Color = this.navigationBarColor,
+    ) = DialogSheetBehaviors(
+        collapseOnBackPress = collapseOnBackPress,
+        collapseOnClickOutside = collapseOnClickOutside,
+        extendsIntoStatusBar = extendsIntoStatusBar,
+        extendsIntoNavigationBar = extendsIntoNavigationBar,
+        dialogSecurePolicy = dialogSecurePolicy,
+        dialogWindowSoftInputMode = dialogWindowSoftInputMode,
+        lightStatusBar = lightStatusBar,
+        lightNavigationBar = lightNavigationBar,
+        statusBarColor = statusBarColor,
+        navigationBarColor = navigationBarColor,
+    )
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
