@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -27,7 +28,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
@@ -41,18 +41,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -254,7 +258,7 @@ fun CoreBottomSheetLayout(
 
     val topInset = WindowInsets.Companion.statusBars
 
-    var contentWidth by remember { mutableIntStateOf(0) }
+    var contentRect by remember { mutableStateOf(Rect.Zero) }
 
     SideEffect {
         state.peekHeight = peekHeight
@@ -332,28 +336,19 @@ fun CoreBottomSheetLayout(
             if (state.offsetY < 0f) {
                 // When a spring animation is running, sheet content may leave the bottom edge,
                 // so we show a background to cover the content behind the bottom sheet.
-                Column(
+                Spacer(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    horizontalAlignment = contentAlignment,
-                ) {
-                    Spacer(
-                        modifier = Modifier
-                            .width(with(density) { contentWidth.toDp() })
-                            .height(36.dp)
-                            .background(
-                                color = backgroundColor,
-                                shape = shape,
-                            )
-                    )
-                }
+                        .align(Alignment.BottomStart)
+                        .width(with(density) { contentRect.width.toDp() })
+                        .offset { IntOffset(x = contentRect.left.toInt(), 0) }
+                        .height(36.dp)
+                        .background(color = backgroundColor, shape = shape)
+                )
             }
 
             SheetContentLayout(
                 state = sheetLayoutState,
                 contentOffsetY = { size ->
-                    contentWidth = size.width
                     computeContentOffsetY(
                         state = state,
                         coroutineScope = coroutineScope,
@@ -368,13 +363,15 @@ fun CoreBottomSheetLayout(
                 Column(
                     modifier = modifier
                         .fillMaxWidth()
-                        .background(backgroundColor, shape = shape)
-                        .run {
-                            if (!behaviors.extendsIntoNavigationBar) {
-                                windowInsetsPadding(WindowInsets.navigationBars)
-                            } else {
-                                this
-                            }
+                        .sheetBackgroundWithInsets(
+                            navigationBarInsets = WindowInsets.navigationBars,
+                            backgroundColor = backgroundColor,
+                            backgroundShape = shape,
+                            extendsIntoNavigationBar = behaviors.extendsIntoNavigationBar,
+                        )
+                        .onGloballyPositioned {
+                            val offset = it.positionInRoot()
+                            contentRect = Rect(offset, it.size.toSize())
                         }
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },

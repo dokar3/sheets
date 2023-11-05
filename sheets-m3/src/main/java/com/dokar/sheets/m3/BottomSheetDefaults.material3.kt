@@ -3,12 +3,15 @@ package com.dokar.sheets.m3
 import android.os.Build
 import android.view.WindowManager
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.SecureFlagPolicy
 import com.dokar.sheets.DialogSheetBehaviors
@@ -37,8 +40,7 @@ object BottomSheetDefaults {
         dialogSecurePolicy: SecureFlagPolicy = SecureFlagPolicy.Inherit,
         dialogWindowSoftInputMode: Int = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
         lightStatusBar: Boolean = false,
-        lightNavigationBar: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                !isSystemInDarkTheme(),
+        lightNavigationBar: Boolean = lightNavigationBar(),
         statusBarColor: Color = Color.Transparent,
         navigationBarColor: Color = if (lightNavigationBar) Color.Transparent else Color.Black,
     ): DialogSheetBehaviors {
@@ -54,5 +56,14 @@ object BottomSheetDefaults {
             statusBarColor = statusBarColor,
             navigationBarColor = navigationBarColor,
         )
+    }
+
+    @Composable
+    private fun lightNavigationBar(): Boolean {
+        val density = LocalDensity.current
+        val maybeLandscape = WindowInsets.navigationBars.getBottom(density) == 0
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !maybeLandscape &&
+                !isSystemInDarkTheme()
     }
 }
