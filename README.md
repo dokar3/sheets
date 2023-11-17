@@ -91,6 +91,23 @@ import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.m3.BottomSheet
 ```
 
+### Window Controlling
+
+System bar colors and some dialog window properties can be customized by the `behaviors` parameter.
+
+```kotlin
+BottomSheet(
+    ...
+    behaviors = BottomSheetDefaults.dialogSheetBehaviors(
+        dialogSecurePolicy = SecureFlagPolicy.Inherit,
+        dialogWindowSoftInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED,
+        lightStatusBar = false,
+        lightNavigationBar = false,
+        statusBarColor = Color.Transparent,
+        navigationBarColor: Color = Color.Black,
+    ),
+) { ... }
+```
 
 ### Embedded sheet
 
