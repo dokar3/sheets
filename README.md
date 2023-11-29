@@ -34,7 +34,7 @@ Another feature-rich bottom sheet in Jetpack Compose.
       state = state,
       // PeekHeight.px(Int) and PeekHeight.fraction(Float) are supported as well.
       peekHeight = PeekHeight.dp(300),
-      // Set to true you don't want the peeked state.
+      // Set to true to the peeked state.
       skipPeeked = false,
   ) { ...}
   ```
