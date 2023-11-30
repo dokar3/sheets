@@ -38,12 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -273,11 +273,6 @@ fun CoreBottomSheetLayout(
                 .filter { it == BottomSheetValue.Collapsed }
                 .collect { contentAlpha.snapTo(0f) }
         }
-        launch {
-            snapshotFlow { state.isAnimating }
-                .filter { it }
-                .collect { contentAlpha.snapTo(1f) }
-        }
     }
 
     DisposableEffect(state) {
@@ -331,7 +326,7 @@ fun CoreBottomSheetLayout(
                         this
                     }
                 }
-                .alpha(contentAlpha.value.coerceIn(0f, 1f)),
+                .graphicsLayer { alpha = contentAlpha.value.coerceIn(0f, 1f) },
         ) {
             if (state.offsetY < 0f) {
                 // When a spring animation is running, sheet content may leave the bottom edge,
