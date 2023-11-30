@@ -8,23 +8,9 @@ Another feature-rich bottom sheet in Jetpack Compose.
 <a href="images/screenshot_list.png"><img src="images/screenshot_list.png" width="32%"/></a>
 <a href="images/screenshot_intent-picker.png"><img src="images/screenshot_intent-picker.png" width="32%"/></a>
 
+Why this is needed when we already have `ModalBottomSheetLayout` and `ModalBottomSheet`? See the [Comparisons](#Comparisons) table. 
+
 # Features
-
-### Easy to use
-  Unlike [`ModalBottomSheetLayout`](https://developer.android.com/reference/kotlin/androidx/compose/material/package-summary#ModalBottomSheetLayout(kotlin.Function1,androidx.compose.ui.Modifier,androidx.compose.material.ModalBottomSheetState,androidx.compose.ui.graphics.Shape,androidx.compose.ui.unit.Dp,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,kotlin.Function0))
-  , this bottom sheet will be displayed in a dialog window, which means we can easily create and
-  display multiple sheets in the same composable:
-
-  ```kotlin
-  @Composable
-  fun MyComposable(modifier: Modifier = Modifier) {
-      val sheet1 = rememberBottomSheetState()
-      val sheet2 = rememberBottomSheetState()
-  
-      BottomSheet(state = sheet1) { ... }
-      BottomSheet(state = sheet2) { ... }
-  }
-  ```
 
 
 ### Peek support
@@ -34,7 +20,7 @@ Another feature-rich bottom sheet in Jetpack Compose.
       state = state,
       // PeekHeight.px(Int) and PeekHeight.fraction(Float) are supported as well.
       peekHeight = PeekHeight.dp(300),
-      // Set to true to the peeked state.
+      // Set to true to the peeked state, default to false.
       skipPeeked = false,
   ) { ...}
   ```
@@ -70,12 +56,18 @@ val state = rememberBottomSheetState(
 
 ### Whole sheet above the keyboard
 
+May be useful when the bottom sheet contains some text fields.
+
+> *Please note after setting this, your sheet content be squashed if the bottom sheet is too long, so make your content scrollable by default.*
+
 ```kotlin
 BottomSheet(
     state = state,
     showAboveKeyboard = true,
 ) {
-    TextFieldSheetContent()
+    TextFieldSheetContent(
+        modifier = Modifier.verticalScroll(rememberScrollState()),
+    )
 }
 ```
 
@@ -167,6 +159,31 @@ implementation("io.github.dokar3:sheets:latest_version")
 ```kotlin
 implementation("io.github.dokar3:sheets-m3:latest_version")
 ```
+
+# Comparisons
+
+|   Feature\Component    | sheets | ModalBottomSheet | ModalBottomSheetLayout |
+|:----------------------:|:------:|:----------------:|:----------------------:|
+|       Material 2       |   ✅    |        ❌         |           ✅            |
+|       Material 3       |   ✅    |        ✅         |           ❌            |
+|        Embedded        |   ✅    |        ❌         |           ✅            |
+|   In modal (Dialog)    |   ✅    |        ✅         |           ❌            |
+|   Dialog properties    |   ✅    |        ❌         |           /            |
+|      Drag handle       |   ✅    |        ✅         |           ❌            |
+| Half expanded (Peeked) |   ✅    |        ✅         |           ✅            |
+|      Peek height       |   ✅    |        ❌         |           ❌            |
+| Custom animation spec  |   ✅    |        ❌         |           ✅            |
+|     Drag progress      |   ✅    |        ❌         |           ✅            |
+|   confirmValueChange   |   ✅    |        ✅         |           ✅            |
+|   Dim color (scrim)    |   ✅    |        ✅         |           ✅            |
+
+*Compose Material is still evolving, so this table may no longer be accurate after some versions.*
+
+# Contribution
+
+Need some features? Found a bug?
+
+Open an issue, or just create a pull request if you want! This project is open for contributions.
 
 # License
 
