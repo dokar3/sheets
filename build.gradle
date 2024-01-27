@@ -6,7 +6,6 @@ buildscript {
         kotlin_version = '1.9.22'
         compile_sdk = 34
         target_sdk = 34
-        build_tools_version = "33.0.1"
     }
     repositories {
         google()

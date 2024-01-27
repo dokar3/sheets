@@ -8,7 +8,6 @@ android {
     namespace 'com.dokar.sheets'
 
     compileSdk compile_sdk
-    buildToolsVersion = build_tools_version
 
     defaultConfig {
         minSdk 21
