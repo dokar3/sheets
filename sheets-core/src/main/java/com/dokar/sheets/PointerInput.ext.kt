@@ -5,7 +5,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.pointerInput
 import kotlinx.coroutines.coroutineScope
 
@@ -22,10 +22,10 @@ internal fun Modifier.detectPointerPositionChanges(
                 onPositionChanged(down.position)
                 onDown?.invoke(down.position)
                 while (true) {
-                    val pe =
-                        awaitPointerEvent(pass = PointerEventPass.Initial)
+                    val pe = awaitPointerEvent(pass = PointerEventPass.Initial)
                     onPositionChanged(pe.changes.first().position)
-                    if (pe.changes.all { it.changedToUp() }) {
+                    val downChanged = pe.changes.firstOrNull { it.id == down.id }
+                    if (downChanged == null || downChanged.changedToUpIgnoreConsumed()) {
                         break
                     }
                 }
