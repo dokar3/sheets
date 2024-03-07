@@ -1,11 +1,19 @@
 package com.dokar.sheets.test
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.dokar.sheets.CoreBottomSheet
 import com.dokar.sheets.rememberBottomSheetState
 import kotlinx.coroutines.launch
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -79,5 +88,53 @@ class SheetGestureTest {
         }
 
         composeTestRule.onNodeWithText(sheetContentText).assertDoesNotExist()
+    }
+
+    @Test
+    fun collapseDuringResizing() {
+        composeTestRule.mainClock.autoAdvance = false
+        var isResizing = false
+
+        composeTestRule.setContent {
+            val state = rememberBottomSheetState()
+
+            var isLargeView by remember { mutableStateOf(false) }
+            val contentHeight by animateDpAsState(
+                targetValue = if (isLargeView) 500.dp else 200.dp,
+                label = "contentHeight",
+                animationSpec = tween(durationMillis = 10000),
+                finishedListener = { isResizing = false }
+            )
+
+            LaunchedEffect(state) {
+                state.expand(animate = false)
+                isLargeView = true
+                isResizing = true
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                CoreBottomSheet(
+                    state = state,
+                    modifier = Modifier.testTag("contentRoot"),
+                    skipPeeked = true,
+                ) {
+                    Box(modifier = Modifier.height(contentHeight))
+                }
+            }
+        }
+
+        composeTestRule.mainClock.advanceTimeByFrame()
+        composeTestRule.onNodeWithTag("contentRoot").assertIsDisplayed()
+
+        assertTrue(isResizing)
+        composeTestRule.onNodeWithTag("contentRoot").assertExists().performTouchInput {
+            // Tap outside of the sheet content
+            click(Offset(0f, -10f))
+        }
+
+        composeTestRule.mainClock.advanceTimeBy(500)
+        composeTestRule.onNodeWithTag("contentRoot").assertDoesNotExist()
     }
 }

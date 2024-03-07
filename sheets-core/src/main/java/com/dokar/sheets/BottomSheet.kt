@@ -415,6 +415,11 @@ private fun computeContentOffsetY(
     val isAnimating = state.isAnimating
     state.contentHeight = size.height
 
+    if (state.animState == BottomSheetState.AnimState.Collapsing) {
+        // Do nothing when collapsing
+        return state.offsetY.toInt()
+    }
+
     fun expand(offsetY: Int) = coroutineScope.launch {
         state.setOffsetY(
             offsetY,
