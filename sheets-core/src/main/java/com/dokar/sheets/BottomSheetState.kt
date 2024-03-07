@@ -110,7 +110,8 @@ class BottomSheetState(
     var value by mutableStateOf(initialValue)
         private set
 
-    private var animState by mutableStateOf(AnimState.None)
+    internal var animState by mutableStateOf(AnimState.None)
+        private set
 
     /**
      * Be true if the sheet is peeking.
