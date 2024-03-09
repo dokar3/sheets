@@ -36,11 +36,11 @@ kotlin {
         val desktopMain by getting
 
         commonMain.dependencies {
-            implementation(project(":sheets-core"))
-            implementation(compose.material)
+            api(project(":sheets-core"))
+            api(compose.material)
         }
         desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            api(compose.desktop.currentOs)
         }
     }
 }
