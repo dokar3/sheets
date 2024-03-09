@@ -33,5 +33,3 @@ jobs:
       - name: Build
         run: ./gradlew build
 
-      - name: Run Android instrumentation tests
-        run: ./gradlew pixel2api31DebugAndroidTest

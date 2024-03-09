@@ -1,0 +1,34 @@
+[versions]
+activityCompose = "1.8.2"
+appcompat = "1.6.1"
+coilCompose = "2.6.0"
+composeCompiler = "1.5.10"
+coreKtx = "1.12.0"
+kotlin = "1.9.20"
+agp = "8.3.0"
+compose-plugin = "1.6.0"
+kotlin2 = "1.9.22"
+lifecycleRuntimeKtx = "2.7.0"
+material = "1.11.0"
+coroutines = "1.8.0"
+
+[libraries]
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.9.22" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin2" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.27.0" }

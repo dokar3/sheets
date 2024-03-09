@@ -2,7 +2,13 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets)
 
-Another feature-rich bottom sheet in Jetpack Compose.
+Another feature-rich bottom sheet for Compose Multiplatform. The following targets are supported.
+
+- Android
+- Desktop
+- Web (wasmJs)
+
+Seeking contributions for the iOS target since I'm a Windows-only user. If you want to help please feel free to make a pull request.
 
 <a href="images/screenshot_simple.png"><img src="images/screenshot_simple.png" width="32%"/></a>
 <a href="images/screenshot_list.png"><img src="images/screenshot_list.png" width="32%"/></a>
