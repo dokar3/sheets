@@ -1,7 +1,62 @@
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.mavenPublish)
+}
+
+kotlin {
+    jvmToolchain(11)
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "sheets-core"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "sheets-core.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    androidTarget {
+        publishLibraryVariants("release")
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
+        }
+    }
+
+    jvm("desktop")
+
+    sourceSets {
+        val desktopMain by getting
+
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+
+        }
+        commonMain.dependencies {
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        desktopMain.dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        val desktopTest by getting {
+            dependencies {
+                implementation(compose.desktop.uiTestJUnit4)
+            }
+        }
+    }
 }
 
 android {
@@ -15,55 +70,20 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDirs("src/androidMain/res")
+    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-    @Suppress("UnstableApiUsage")
-    testOptions {
-        managedDevices {
-            localDevices {
-                create("pixel2api31") {
-                    device = "Pixel 2"
-                    apiLevel = 31
-                    systemImageSource = "aosp-atd"
-                }
-            }
-        }
+
+    dependencies {
+        debugImplementation(libs.compose.ui.tooling)
     }
 }
 
-dependencies {
-
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.util)
-    implementation(libs.compose.foundation)
-
-    implementation(libs.androidx.activity.compose)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.compose.ui.test.junit4)
-    androidTestImplementation(libs.compose.material)
-    debugImplementation(libs.compose.ui.test.manifest)
+compose.experimental {
+    web.application {}
 }

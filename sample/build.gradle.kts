@@ -1,6 +1,65 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.jetbrainsCompose)
+}
+
+kotlin {
+    jvmToolchain(11)
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "sheets-sample"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "sheets-sample.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    androidTarget {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = "11"
+            }
+        }
+    }
+
+    jvm("desktop")
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(project(":sheets-core"))
+                implementation(project(":sheets"))
+                implementation(project(":sheets-m3"))
+                implementation(compose.material)
+                implementation(compose.material3)
+            }
+        }
+
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.androidx.core.ktx)
+                implementation(libs.androidx.appcompat)
+                implementation(libs.material)
+                implementation(libs.androidx.lifecycle.runtime.ktx)
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.compose.ui.tooling.preview)
+                implementation(libs.coil.compose)
+            }
+        }
+
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
+        }
+    }
 }
 
 android {
@@ -35,36 +94,20 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+}
+
+compose.desktop {
+    application {
+        mainClass = "com.dokar.sonner.sample.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "com.dokar.sonner.sample"
+            packageVersion = "1.0.0"
+        }
     }
 }
 
-dependencies {
-
-    implementation(project(":sheets-core"))
-    implementation(project(":sheets"))
-    implementation(project(":sheets-m3"))
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.util)
-    implementation(libs.compose.ui.tooling)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material)
-    implementation(libs.compose.material3)
-
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-
-    implementation(libs.coil.compose)
+compose.experimental {
+    web.application {}
 }

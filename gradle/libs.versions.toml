@@ -2,37 +2,27 @@
 activityCompose = "1.8.2"
 appcompat = "1.6.1"
 coilCompose = "2.6.0"
-composeBom = "2024.02.02"
 composeCompiler = "1.5.10"
 coreKtx = "1.12.0"
-espressoCore = "3.5.1"
-junit = "4.13.2"
-junitVersion = "1.1.5"
 kotlin = "1.9.20"
 agp = "8.3.0"
 compose-plugin = "1.6.0"
 kotlin2 = "1.9.22"
 lifecycleRuntimeKtx = "2.7.0"
 material = "1.11.0"
+coroutines = "1.8.0"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
-androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version = "1.9.22" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
-compose-foundation = { module = "androidx.compose.foundation:foundation" }
-compose-ui = { module = "androidx.compose.ui:ui" }
-compose-ui-util = { module = "androidx.compose.ui:ui-util" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
-compose-material = { module = "androidx.compose.material:material" }
-compose-material3 = { module = "androidx.compose.material3:material3" }
-junit = { module = "junit:junit", version.ref = "junit" }
+compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
 [plugins]
