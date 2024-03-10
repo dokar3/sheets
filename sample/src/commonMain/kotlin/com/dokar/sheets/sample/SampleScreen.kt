@@ -112,17 +112,33 @@ internal fun SampleScreen(
                 }
                 .background(backgroundColor)
                 .windowInsetsPadding(WindowInsets.systemBars),
+            contentAlignment = Alignment.TopCenter,
         ) {
             Column(
                 modifier = modifier
                     .padding(16.dp)
                     .widthIn(max = 1000.dp),
             ) {
-                Text(
-                    text = "Sheets",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "Sheets",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "Dark", color = if (isDarkTheme) Color.White else Color.Black)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Switch(
+                            checked = isDarkTheme,
+                            onCheckedChange = onUpdateDarkTheme,
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -213,20 +229,6 @@ internal fun SampleScreen(
                         skipPeeked = skipPeeked,
                     ),
                     modifier = Modifier.height(500.dp),
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "Dark", color = if (isDarkTheme) Color.White else Color.Black)
-                Spacer(modifier = Modifier.width(4.dp))
-                Switch(
-                    checked = isDarkTheme,
-                    onCheckedChange = onUpdateDarkTheme,
                 )
             }
         }
