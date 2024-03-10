@@ -2,6 +2,8 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets)
 
+[Online Demo](https://dokar3.github.io/sheets/)
+
 Another feature-rich bottom sheet for Compose Multiplatform. The following targets are supported.
 
 - Android
