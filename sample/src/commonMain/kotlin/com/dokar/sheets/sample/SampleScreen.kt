@@ -94,6 +94,10 @@ internal fun SampleScreen(
         mutableListOf(Dp.Unspecified, 500.dp, 700.dp, 1000.dp)
     }
 
+    val density = LocalDensity.current
+
+    val topInset = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
+
     fun showType(type: SheetContentType) {
         contentType = type
         scope.launch { state.expand(animate = withAnimation) }
@@ -253,12 +257,10 @@ internal fun SampleScreen(
         }
     }
 
-    val density = LocalDensity.current
-
     val sheetModifier = Modifier.widthIn(max = maxWidth)
         .let {
             if (iosLike) {
-                it.height(with(density) { containerHeight.toDp() - 32.dp })
+                it.height(with(density) { containerHeight.toDp() - topInset - 32.dp })
             } else {
                 it
             }
