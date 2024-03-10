@@ -1,262 +1,504 @@
 package com.dokar.sheets.sample
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.sp
 import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetState
-import com.dokar.sheets.PeekHeight
 import com.dokar.sheets.rememberBottomSheetState
 import com.dokar.sheets.sample.theme.ComposeBottomSheetTheme
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 internal fun SampleScreen(
     isDarkTheme: Boolean,
     onUpdateDarkTheme: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = if (isDarkTheme) Color(0xff121212) else Color.White
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(backgroundColor)
-            .windowInsetsPadding(WindowInsets.systemBars),
+
+    val scope = rememberCoroutineScope()
+
+    var material3 by remember { mutableStateOf(false) }
+    var withAnimation by remember { mutableStateOf(true) }
+    var iosTransition by remember { mutableStateOf(false) }
+    var skipPeeked by remember { mutableStateOf(true) }
+    var maxWidth by remember { mutableStateOf(Dp.Unspecified) }
+
+    var showAboveKeyboard by remember { mutableStateOf(false) }
+
+    var contentType by remember { mutableStateOf(SheetContentType.Simple) }
+
+    val state = rememberBottomSheetState()
+
+    val maxWidths = remember {
+        mutableListOf(Dp.Unspecified, 500.dp, 700.dp, 1000.dp)
+    }
+
+    fun showType(type: SheetContentType) {
+        contentType = type
+        scope.launch { state.expand(animate = withAnimation) }
+    }
+
+    Material3Surface(
+        isDarkTheme = isDarkTheme,
+        backgroundColor = Color.Black,
+        modifier = Modifier,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            ComposeBottomSheetTheme(darkTheme = isDarkTheme) {
-                Surface(color = backgroundColor) {
-                    Sheets()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+                .let {
+                    if (iosTransition) {
+                        it.iosBottomSheetTransitions(state = state, WindowInsets.statusBars)
+                    } else {
+                        it
+                    }
                 }
+                .background(backgroundColor)
+                .windowInsetsPadding(WindowInsets.systemBars),
+        ) {
+            Column(
+                modifier = modifier
+                    .padding(16.dp)
+                    .widthIn(max = 1000.dp),
+            ) {
+                Text(
+                    text = "Sheets",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(text = "Options", fontWeight = FontWeight.Bold)
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    SheetOptionChip(
+                        selected = material3,
+                        onClick = { material3 = !material3 },
+                        label = { Text("Material 3") },
+                    )
+
+                    SheetOptionChip(
+                        selected = withAnimation,
+                        onClick = { withAnimation = !withAnimation },
+                        label = { Text("With animation") },
+                    )
+
+                    SheetOptionChip(
+                        selected = iosTransition,
+                        onClick = { iosTransition = !iosTransition },
+                        label = { Text("iOS transition") },
+                    )
+
+                    SheetOptionChip(
+                        selected = skipPeeked,
+                        onClick = { skipPeeked = !skipPeeked },
+                        label = { Text("Skip peeked") },
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(text = "Max width", fontWeight = FontWeight.Bold)
+
+                Spacer(Modifier.height(8.dp))
+
+                DpSlider(
+                    values = maxWidths,
+                    selected = maxWidths.indexOf(maxWidth),
+                    onSelect = { maxWidth = maxWidths[it] },
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(text = "Show", fontWeight = FontWeight.Bold)
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(onClick = { showType(SheetContentType.Simple) }) {
+                        Text("Simple")
+                    }
+
+                    Button(onClick = { showType(SheetContentType.List) }) {
+                        Text("List")
+                    }
+
+                    Button(onClick = { showType(SheetContentType.IntentPicker) }) {
+                        Text("Intent Picker")
+                    }
+
+                    Button(onClick = { showType(SheetContentType.Inputs) }) {
+                        Text("Text fields")
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                DashedDivider()
+
+                Spacer(Modifier.height(16.dp))
+
+                Text(text = "Code", fontWeight = FontWeight.Bold)
+
+                Spacer(Modifier.height(8.dp))
+
+                SampleCode(
+                    code = rememberSampleCode(
+                        material3 = material3,
+                        maxWidth = maxWidth,
+                        withAnimation = withAnimation,
+                        iosTransition = iosTransition,
+                        skipPeeked = skipPeeked,
+                    ),
+                    modifier = Modifier.height(500.dp),
+                )
             }
 
-            MaterialTheme(
-                colorScheme = if (isDarkTheme) {
-                    darkColorScheme()
-                } else {
-                    lightColorScheme()
-                },
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                androidx.compose.material3.Surface(
-                    color = backgroundColor,
-                    contentColor = contentColorFor(
-                        MaterialTheme.colorScheme.background
-                    ),
+                Text(text = "Dark", color = if (isDarkTheme) Color.White else Color.Black)
+                Spacer(modifier = Modifier.width(4.dp))
+                Switch(
+                    checked = isDarkTheme,
+                    onCheckedChange = onUpdateDarkTheme,
+                )
+            }
+        }
+    }
+
+    val content = movableContentOf {
+        when (contentType) {
+            SheetContentType.Simple -> SimpleSheetContent(state)
+            SheetContentType.List -> ListSheetContent()
+            SheetContentType.IntentPicker -> IntentPickerSheetContent(state)
+            SheetContentType.Inputs -> TextFieldSheetContent(
+                state = state,
+                showAboveKeyboard = showAboveKeyboard,
+                onShowAboveKeyboardChange = { showAboveKeyboard = it },
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            )
+        }
+    }
+
+    if (material3) {
+        Material3Surface(
+            isDarkTheme = isDarkTheme,
+            backgroundColor = backgroundColor,
+        ) {
+            com.dokar.sheets.m3.BottomSheet(
+                state = state,
+                modifier = Modifier.widthIn(max = maxWidth),
+                skipPeeked = skipPeeked,
+                showAboveKeyboard = showAboveKeyboard,
+            ) {
+                content()
+            }
+        }
+    } else {
+        ComposeBottomSheetTheme(darkTheme = isDarkTheme) {
+            Surface(color = backgroundColor) {
+                BottomSheet(
+                    state = state,
+                    modifier = Modifier.widthIn(max = maxWidth),
+                    skipPeeked = skipPeeked,
+                    showAboveKeyboard = showAboveKeyboard,
                 ) {
-                    M3Sheets()
+                    content()
                 }
             }
         }
+    }
+}
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+@Composable
+private fun Material3Surface(
+    isDarkTheme: Boolean,
+    backgroundColor: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    MaterialTheme(
+        colorScheme = if (isDarkTheme) {
+            darkColorScheme()
+        } else {
+            lightColorScheme()
+        },
+    ) {
+        androidx.compose.material3.Surface(
+            color = backgroundColor,
+            contentColor = contentColorFor(
+                MaterialTheme.colorScheme.background
+            ),
+            modifier = modifier,
         ) {
-            Text(text = "Dark", color = if (isDarkTheme) Color.White else Color.Black)
-            Spacer(modifier = Modifier.width(4.dp))
-            Switch(
-                checked = isDarkTheme,
-                onCheckedChange = onUpdateDarkTheme,
+            content()
+        }
+    }
+}
+
+enum class SheetContentType {
+    Simple,
+    List,
+    IntentPicker,
+    Inputs,
+}
+
+@Composable
+private fun SheetOptionChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    label: @Composable () -> Unit,
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = label,
+        modifier = modifier,
+        leadingIcon = {
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun DpSlider(
+    values: List<Dp>,
+    selected: Int,
+    onSelect: (index: Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            for ((index, dp) in values.withIndex()) {
+                Text(
+                    text = if (dp.isUnspecified) "Unspecified" else "${dp.value.toInt()}dp",
+                    fontSize = 15.sp,
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onSelect(index) }
+                    )
+                )
+            }
+        }
+
+        Slider(
+            value = selected.toFloat() / values.lastIndex,
+            onValueChange = {
+                val perStep = 1f / (values.size - 1)
+                val index = (it / perStep).roundToInt()
+                if (index != selected) {
+                    onSelect(index)
+                }
+            },
+            steps = values.size - 2,
+        )
+    }
+}
+
+@Composable
+private fun DashedDivider(
+    height: Dp = 2.dp,
+    dashWidth: Dp = 8.dp,
+    gap: Dp = 4.dp,
+    color: Color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.36f),
+) {
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .drawWithCache {
+                val pathEffect = PathEffect.dashPathEffect(
+                    intervals = floatArrayOf(dashWidth.toPx(), gap.toPx())
+                )
+                onDrawBehind {
+                    drawLine(
+                        color = color,
+                        start = center.copy(x = 0f),
+                        end = center.copy(x = size.width),
+                        strokeWidth = height.toPx(),
+                        pathEffect = pathEffect,
+                    )
+                }
+            },
+    )
+}
+
+@Composable
+private fun SampleCode(
+    code: String,
+    modifier: Modifier = Modifier,
+) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier.clip(MaterialTheme.shapes.medium)) {
+        SelectionContainer {
+            Text(
+                text = code,
+                fontFamily = FontFamily.Monospace,
+                fontSize = 14.sp,
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xff313131))
+                    .padding(8.dp)
+                    .verticalScroll(state = scrollState),
             )
         }
     }
 }
 
 @Composable
-private fun Sheets(modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-
-    val simpleSheetState = rememberBottomSheetState()
-    val listSheetState = rememberBottomSheetState()
-    val intentPickerSheetState = rememberBottomSheetState()
-    val editSheetState = rememberBottomSheetState()
-
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = { scope.launch { simpleSheetState.expand() } }) {
-            Text("Simple")
+private fun rememberSampleCode(
+    material3: Boolean,
+    maxWidth: Dp,
+    withAnimation: Boolean,
+    iosTransition: Boolean,
+    skipPeeked: Boolean,
+): String {
+    return remember(material3, maxWidth, withAnimation, iosTransition, skipPeeked) {
+        val animateParam = if (withAnimation) "" else "animate = false"
+        val maxWidthModifier = if (maxWidth.isSpecified) {
+            ".widthIn(max = $maxWidth)"
+        } else {
+            ""
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = { scope.launch { listSheetState.peek() } }) {
-            Text("List")
+        val iosTransitionModifier = if (iosTransition) {
+            ".iosBottomSheetTransition(state, WindowInsets.statusBar)"
+        } else {
+            ""
         }
+        """
+            // Other imports
+            import com.dokar.sheets${if (material3) ".m3" else ""}.BottomSheet
+            import com.dokar.sheets.rememberBottomSheetState
+            
+            @Composable
+            fun SampleScreen(modifier: Modifier = Modifier) {
+                val scope = rememberCoroutineScope()
+                val state = rememberBottomSheetState()
+                
+                fun show() = scope.launch { state.expand($animateParam) }
+                
+                fun hide() = scope.launch { state.collapse($animateParam}) }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        $iosTransitionModifier
+                ) {
+                    // Screen content
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = { scope.launch { intentPickerSheetState.peek() } }) {
-            Text("Intent Picker")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(onClick = { scope.launch { editSheetState.expand() } }) {
-            Text("Text fields")
-        }
-    }
-
-    SimpleBottomSheet(state = simpleSheetState)
-
-    ListBottomSheet(state = listSheetState)
-
-    IntentPickerBottomSheet(state = intentPickerSheetState)
-
-    TextFieldBottomSheet(state = editSheetState)
-}
-
-@Composable
-private fun M3Sheets(modifier: Modifier = Modifier) {
-    val scope = rememberCoroutineScope()
-
-    val md3SimpleSheetState = rememberBottomSheetState()
-
-    Column(modifier = modifier) {
-        androidx.compose.material3.Button(
-            onClick = { scope.launch { md3SimpleSheetState.expand() } }
-        ) {
-            androidx.compose.material3.Text("Material 3")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-    }
-
-    Md3SimpleBottomSheet(state = md3SimpleSheetState)
-}
-
-@Composable
-fun SimpleBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier
-) {
-    BottomSheet(
-        state = state,
-        modifier = modifier,
-        skipPeeked = true,
-    ) {
-        SimpleSheetContent(state)
-    }
-}
-
-
-@Composable
-fun Md3SimpleBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier
-) {
-    com.dokar.sheets.m3.BottomSheet(
-        state = state,
-        modifier = modifier,
-        skipPeeked = true,
-    ) {
-        M3SimpleSheetContent(state)
-    }
-}
-
-@Composable
-private fun ListBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier
-) {
-    var sheetShape by remember {
-        mutableStateOf(RoundedCornerShape(0f))
-    }
-
-    LaunchedEffect(state) {
-        snapshotFlow { state.dragProgress }
-            .distinctUntilChanged()
-            .collect {
-                sheetShape = RoundedCornerShape(16.dp * it)
+                    BottomSheet(
+                        state = state,
+                        modifier = Modifier$maxWidthModifier,
+                        skipPeeked = $skipPeeked,
+                    ) {
+                        // Sheet content
+                    }
+                }
             }
-    }
-
-    BottomSheet(
-        state = state,
-        modifier = modifier
-            .fillMaxHeight(0.8f)
-            .heightIn(min = 300.dp),
-        peekHeight = PeekHeight.fraction(0.6f),
-        shape = sheetShape,
-    ) {
-        ListSheetContent()
+            ${if (iosTransition) IOS_BOTTOM_SHEET_TRANSITION_CODE else ""}
+        """.trimIndent()
     }
 }
 
-@Composable
-private fun IntentPickerBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier,
-) {
-    BottomSheet(
-        state = state,
-        modifier = modifier,
-        peekHeight = PeekHeight.dp(420),
-    ) {
-        IntentPickerSheetContent(state)
-    }
-}
-
-@Composable
-private fun TextFieldBottomSheet(
-    state: BottomSheetState,
-    modifier: Modifier = Modifier,
-) {
-    var showAboveKeyboard by remember { mutableStateOf(false) }
-    BottomSheet(
-        state = state,
-        modifier = modifier,
-        skipPeeked = true,
-        showAboveKeyboard = showAboveKeyboard,
-    ) {
-        TextFieldSheetContent(
-            state = state,
-            showAboveKeyboard = showAboveKeyboard,
-            onShowAboveKeyboardChange = { showAboveKeyboard = it },
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-        )
-    }
-}
+private const val IOS_BOTTOM_SHEET_TRANSITION_CODE = """
+            fun Modifier.iosBottomSheetTransitions(
+                state: BottomSheetState,
+                statusBarInsets: WindowInsets,
+            ): Modifier = graphicsLayer {
+                val progress = (state.dragProgress - 0.5f) / 0.5f
+                if (progress <= 0f) {
+                    return@graphicsLayer
+                }
+            
+                val minScale = if (size.width > size.height) 0.95f else 0.92f
+            
+                val scale = 1f - (1f - minScale) * progress
+                scaleX = scale
+                scaleY = scale
+            
+                val statusBarHeight = statusBarInsets.getTop(this)
+                val scaledTopSpacing = size.height * (1f - minScale) / 2f
+                translationY = progress * (statusBarHeight +
+                        16.dp.toPx() - scaledTopSpacing)
+            
+                clip = true
+                shape = RoundedCornerShape(progress * 16.dp)
+            }
+"""
