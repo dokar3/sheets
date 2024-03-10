@@ -39,6 +39,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +50,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -75,13 +78,15 @@ internal fun SampleScreen(
 
     var material3 by remember { mutableStateOf(false) }
     var withAnimation by remember { mutableStateOf(true) }
-    var iosTransition by remember { mutableStateOf(false) }
+    var iosLike by remember { mutableStateOf(false) }
     var skipPeeked by remember { mutableStateOf(true) }
     var maxWidth by remember { mutableStateOf(Dp.Unspecified) }
 
     var showAboveKeyboard by remember { mutableStateOf(false) }
 
     var contentType by remember { mutableStateOf(SheetContentType.Simple) }
+
+    var containerHeight by remember { mutableIntStateOf(0) }
 
     val state = rememberBottomSheetState()
 
@@ -97,20 +102,20 @@ internal fun SampleScreen(
     Material3Surface(
         isDarkTheme = isDarkTheme,
         backgroundColor = Color.Black,
-        modifier = Modifier,
+        modifier = Modifier.onSizeChanged { containerHeight = it.height },
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(state = rememberScrollState())
                 .let {
-                    if (iosTransition) {
+                    if (iosLike) {
                         it.iosBottomSheetTransitions(state = state, WindowInsets.statusBars)
                     } else {
                         it
                     }
                 }
                 .background(backgroundColor)
+                .verticalScroll(state = rememberScrollState())
                 .windowInsetsPadding(WindowInsets.systemBars),
             contentAlignment = Alignment.TopCenter,
         ) {
@@ -161,9 +166,9 @@ internal fun SampleScreen(
                     )
 
                     SheetOptionChip(
-                        selected = iosTransition,
-                        onClick = { iosTransition = !iosTransition },
-                        label = { Text("iOS transition") },
+                        selected = iosLike,
+                        onClick = { iosLike = !iosLike },
+                        label = { Text("iOS like") },
                     )
 
                     SheetOptionChip(
@@ -225,7 +230,7 @@ internal fun SampleScreen(
                         material3 = material3,
                         maxWidth = maxWidth,
                         withAnimation = withAnimation,
-                        iosTransition = iosTransition,
+                        iosTransition = iosLike,
                         skipPeeked = skipPeeked,
                     ),
                     modifier = Modifier.height(500.dp),
@@ -248,6 +253,17 @@ internal fun SampleScreen(
         }
     }
 
+    val density = LocalDensity.current
+
+    val sheetModifier = Modifier.widthIn(max = maxWidth)
+        .let {
+            if (iosLike) {
+                it.height(with(density) { containerHeight.toDp() - 32.dp })
+            } else {
+                it
+            }
+        }
+
     if (material3) {
         Material3Surface(
             isDarkTheme = isDarkTheme,
@@ -255,7 +271,7 @@ internal fun SampleScreen(
         ) {
             com.dokar.sheets.m3.BottomSheet(
                 state = state,
-                modifier = Modifier.widthIn(max = maxWidth),
+                modifier = sheetModifier,
                 skipPeeked = skipPeeked,
                 showAboveKeyboard = showAboveKeyboard,
             ) {
@@ -267,7 +283,7 @@ internal fun SampleScreen(
             Surface(color = backgroundColor) {
                 BottomSheet(
                     state = state,
-                    modifier = Modifier.widthIn(max = maxWidth),
+                    modifier = sheetModifier,
                     skipPeeked = skipPeeked,
                     showAboveKeyboard = showAboveKeyboard,
                 ) {
@@ -439,8 +455,15 @@ private fun rememberSampleCode(
         } else {
             ""
         }
-        val iosTransitionModifier = if (iosTransition) {
-            ".iosBottomSheetTransitions(state, WindowInsets.statusBar)"
+        val iosContainerModifier = if (iosTransition) {
+            val indent = "                        "
+            "\n$indent.iosBottomSheetTransitions(state, WindowInsets.statusBar)"
+        } else {
+            ""
+        }
+        val iosSheetModifier = if (iosTransition) {
+            val indent = "                            "
+            "\n$indent.height(with(LocalDensity.current) { containerHeight.toDp() - 32.dp })"
         } else {
             ""
         }
@@ -460,14 +483,13 @@ private fun rememberSampleCode(
                 
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        $iosTransitionModifier
+                        .fillMaxSize()$iosContainerModifier,
                 ) {
                     // Screen content
 
                     BottomSheet(
                         state = state,
-                        modifier = Modifier$maxWidthModifier,
+                        modifier = Modifier$maxWidthModifier$iosSheetModifier,
                         skipPeeked = $skipPeeked,
                     ) {
                         // Sheet content
