@@ -440,7 +440,7 @@ private fun rememberSampleCode(
             ""
         }
         val iosTransitionModifier = if (iosTransition) {
-            ".iosBottomSheetTransition(state, WindowInsets.statusBar)"
+            ".iosBottomSheetTransitions(state, WindowInsets.statusBar)"
         } else {
             ""
         }
