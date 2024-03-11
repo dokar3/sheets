@@ -98,11 +98,6 @@ internal fun SampleScreen(
 
     val topInset = with(density) { WindowInsets.statusBars.getTop(this).toDp() }
 
-    fun showType(type: SheetContentType) {
-        contentType = type
-        scope.launch { state.expand(animate = withAnimation) }
-    }
-
     Material3Surface(
         isDarkTheme = isDarkTheme,
         backgroundColor = Color.Black,
@@ -196,26 +191,34 @@ internal fun SampleScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                Text(text = "Show", fontWeight = FontWeight.Bold)
+                Text(text = "Content", fontWeight = FontWeight.Bold)
 
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Button(onClick = { showType(SheetContentType.Simple) }) {
-                        Text("Simple")
+                    for (type in SheetContentType.entries) {
+                        SheetOptionChip(
+                            selected = type == contentType,
+                            onClick = { contentType = type },
+                            label = { Text(type.name) }
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+
+                Text(text = "Actions", fontWeight = FontWeight.Bold)
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(onClick = { scope.launch { state.peek(animate = withAnimation) } }) {
+                        Text("Peek")
                     }
 
-                    Button(onClick = { showType(SheetContentType.List) }) {
-                        Text("List")
-                    }
-
-                    Button(onClick = { showType(SheetContentType.IntentPicker) }) {
-                        Text("Intent Picker")
-                    }
-
-                    Button(onClick = { showType(SheetContentType.Inputs) }) {
-                        Text("Text fields")
+                    Button(onClick = { scope.launch { state.expand(animate = withAnimation) } }) {
+                        Text("Expand")
                     }
                 }
 
