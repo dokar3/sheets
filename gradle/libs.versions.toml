@@ -1,5 +1,5 @@
 [versions]
-activityCompose = "1.8.2"
+activityCompose = "1.9.0"
 appcompat = "1.6.1"
 coilCompose = "2.6.0"
 composeCompiler = "1.5.11"
