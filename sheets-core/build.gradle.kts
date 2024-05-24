@@ -84,7 +84,3 @@ android {
         debugImplementation(libs.compose.ui.tooling)
     }
 }
-
-compose.experimental {
-    web.application {}
-}
