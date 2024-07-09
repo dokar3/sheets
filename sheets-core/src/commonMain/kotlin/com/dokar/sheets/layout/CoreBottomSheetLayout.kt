@@ -144,8 +144,6 @@ fun CoreBottomSheetLayout(
             .then(
                 if (behaviors.isModal) {
                     Modifier
-                } else {
-                    Modifier
                         .fillMaxSize()
                         .drawBehind { drawRect(color = dimColor.copy(alpha = dimAlpha)) }
                         .nestedScroll(nestedScrollConnection)
@@ -174,6 +172,8 @@ fun CoreBottomSheetLayout(
                             },
                             onPositionChanged = { state.addVelocity(it.y) },
                         )
+                } else {
+                    Modifier
                 }
             )
     ) {
