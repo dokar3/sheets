@@ -18,12 +18,12 @@ class DialogSheetBehaviors(
     val lightStatusBar: Boolean = false,
     val lightNavigationBar: Boolean = false,
     val statusBarColor: Color = Color.Transparent,
-    val navigationBarColor: Color = Color.Transparent,
+    val navigationBarColor: Color = Color.Transparent
 ) : SheetBehaviors(
     collapseOnBackPress = collapseOnBackPress,
     collapseOnClickOutside = collapseOnClickOutside,
     extendsIntoStatusBar = extendsIntoStatusBar,
-    extendsIntoNavigationBar = extendsIntoNavigationBar,
+    extendsIntoNavigationBar = extendsIntoNavigationBar
 ) {
     fun copy(
         collapseOnBackPress: Boolean = this.collapseOnBackPress,
@@ -35,7 +35,7 @@ class DialogSheetBehaviors(
         lightStatusBar: Boolean = this.lightStatusBar,
         lightNavigationBar: Boolean = this.lightNavigationBar,
         statusBarColor: Color = this.statusBarColor,
-        navigationBarColor: Color = this.navigationBarColor,
+        navigationBarColor: Color = this.navigationBarColor
     ) = DialogSheetBehaviors(
         collapseOnBackPress = collapseOnBackPress,
         collapseOnClickOutside = collapseOnClickOutside,
@@ -46,7 +46,7 @@ class DialogSheetBehaviors(
         lightStatusBar = lightStatusBar,
         lightNavigationBar = lightNavigationBar,
         statusBarColor = statusBarColor,
-        navigationBarColor = navigationBarColor,
+        navigationBarColor = navigationBarColor
     )
 
     override fun equals(other: Any?): Boolean {
@@ -85,6 +85,7 @@ open class SheetBehaviors(
     val collapseOnClickOutside: Boolean = true,
     val extendsIntoStatusBar: Boolean = false,
     val extendsIntoNavigationBar: Boolean = false,
+    val isModal: Boolean = true
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -94,6 +95,7 @@ open class SheetBehaviors(
         if (collapseOnClickOutside != other.collapseOnClickOutside) return false
         if (extendsIntoStatusBar != other.extendsIntoStatusBar) return false
         if (extendsIntoNavigationBar != other.extendsIntoNavigationBar) return false
+        if (isModal != other.isModal) return false
 
         return true
     }
@@ -103,6 +105,7 @@ open class SheetBehaviors(
         result = 31 * result + collapseOnClickOutside.hashCode()
         result = 31 * result + extendsIntoStatusBar.hashCode()
         result = 31 * result + extendsIntoNavigationBar.hashCode()
+        result = 31 * result + isModal.hashCode()
         return result
     }
 }
