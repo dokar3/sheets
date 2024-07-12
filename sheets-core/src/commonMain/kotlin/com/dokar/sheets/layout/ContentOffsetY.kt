@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
-fun computeContentOffsetY(
+internal fun computeContentOffsetY(
     state: BottomSheetState,
     coroutineScope: CoroutineScope,
     density: Density,

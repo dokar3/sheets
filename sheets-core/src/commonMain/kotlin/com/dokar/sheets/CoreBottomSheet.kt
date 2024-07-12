@@ -1,4 +1,4 @@
-package com.dokar.sheets.dialog
+package com.dokar.sheets
 
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,15 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import com.dokar.sheets.BottomSheetState
-import com.dokar.sheets.BottomSheetValue
-import com.dokar.sheets.CoreBottomSheetDefaults
-import com.dokar.sheets.CoreBottomSheetDragHandle
-import com.dokar.sheets.DialogSheetBehaviors
-import com.dokar.sheets.PeekHeight
-import com.dokar.sheets.SheetHost
-import com.dokar.sheets.layout.CoreBottomSheetLayout
-import com.dokar.sheets.rememberBottomSheetState
 import kotlinx.coroutines.launch
 
 /**

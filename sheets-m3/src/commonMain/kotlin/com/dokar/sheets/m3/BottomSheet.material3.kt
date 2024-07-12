@@ -10,8 +10,8 @@ import com.dokar.sheets.CoreBottomSheetDefaults
 import com.dokar.sheets.DialogSheetBehaviors
 import com.dokar.sheets.PeekHeight
 import com.dokar.sheets.SheetBehaviors
-import com.dokar.sheets.dialog.CoreBottomSheet
-import com.dokar.sheets.layout.CoreBottomSheetLayout
+import com.dokar.sheets.CoreBottomSheet
+import com.dokar.sheets.CoreBottomSheetLayout
 import com.dokar.sheets.rememberBottomSheetState
 
 /**

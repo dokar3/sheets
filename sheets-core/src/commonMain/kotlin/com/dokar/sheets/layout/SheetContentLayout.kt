@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.IntSize
 import kotlin.math.max
 
 @Composable
-fun SheetContentLayout(
+internal fun SheetContentLayout(
     modifier: Modifier = Modifier,
     state: SheetContentLayoutState = rememberSheetContentLayoutState(),
     alignment: Alignment.Horizontal = Alignment.CenterHorizontally,

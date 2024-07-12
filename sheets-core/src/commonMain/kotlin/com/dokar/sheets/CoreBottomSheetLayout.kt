@@ -1,4 +1,4 @@
-package com.dokar.sheets.layout
+package com.dokar.sheets
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.background
@@ -45,16 +45,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.dokar.sheets.BottomSheetState
-import com.dokar.sheets.BottomSheetValue
-import com.dokar.sheets.CoreBottomSheetDefaults
-import com.dokar.sheets.CoreBottomSheetDragHandle
-import com.dokar.sheets.PeekHeight
-import com.dokar.sheets.SheetBehaviors
-import com.dokar.sheets.SheetNestedScrollConnection
-import com.dokar.sheets.detectPointerPositionChanges
-import com.dokar.sheets.rememberBottomSheetState
-import com.dokar.sheets.sheetBackgroundWithInsets
+import com.dokar.sheets.layout.SheetContentLayout
+import com.dokar.sheets.layout.computeContentOffsetY
+import com.dokar.sheets.layout.rememberSheetContentLayoutState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -142,7 +135,9 @@ fun CoreBottomSheetLayout(
     Box(
         modifier = Modifier
             .then(
-                if (behaviors.isModal) {
+                if (behaviors.allowOutsideInteraction) {
+                    Modifier
+                } else {
                     Modifier
                         .fillMaxSize()
                         .drawBehind { drawRect(color = dimColor.copy(alpha = dimAlpha)) }
@@ -172,8 +167,6 @@ fun CoreBottomSheetLayout(
                             },
                             onPositionChanged = { state.addVelocity(it.y) },
                         )
-                } else {
-                    Modifier
                 }
             )
     ) {

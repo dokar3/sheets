@@ -85,7 +85,7 @@ open class SheetBehaviors(
     val collapseOnClickOutside: Boolean = true,
     val extendsIntoStatusBar: Boolean = false,
     val extendsIntoNavigationBar: Boolean = false,
-    val isModal: Boolean = true
+    val allowOutsideInteraction: Boolean = false
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -95,7 +95,7 @@ open class SheetBehaviors(
         if (collapseOnClickOutside != other.collapseOnClickOutside) return false
         if (extendsIntoStatusBar != other.extendsIntoStatusBar) return false
         if (extendsIntoNavigationBar != other.extendsIntoNavigationBar) return false
-        if (isModal != other.isModal) return false
+        if (allowOutsideInteraction != other.allowOutsideInteraction) return false
 
         return true
     }
@@ -105,7 +105,7 @@ open class SheetBehaviors(
         result = 31 * result + collapseOnClickOutside.hashCode()
         result = 31 * result + extendsIntoStatusBar.hashCode()
         result = 31 * result + extendsIntoNavigationBar.hashCode()
-        result = 31 * result + isModal.hashCode()
+        result = 31 * result + allowOutsideInteraction.hashCode()
         return result
     }
 }

@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.LayoutCoordinates
 
-class SheetContentLayoutState {
+internal class SheetContentLayoutState {
     var coordinates: LayoutCoordinates? = null
 
     var contentX = 0
@@ -24,6 +24,6 @@ class SheetContentLayoutState {
 }
 
 @Composable
-fun rememberSheetContentLayoutState(): SheetContentLayoutState {
+internal fun rememberSheetContentLayoutState(): SheetContentLayoutState {
     return remember { SheetContentLayoutState() }
 }

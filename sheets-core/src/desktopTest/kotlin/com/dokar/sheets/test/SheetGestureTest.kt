@@ -25,7 +25,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
-import com.dokar.sheets.dialog.CoreBottomSheet
+import com.dokar.sheets.CoreBottomSheet
 import com.dokar.sheets.rememberBottomSheetState
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertTrue
