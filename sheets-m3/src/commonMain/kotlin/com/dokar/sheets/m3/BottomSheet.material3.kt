@@ -6,12 +6,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import com.dokar.sheets.BottomSheetState
-import com.dokar.sheets.CoreBottomSheet
 import com.dokar.sheets.CoreBottomSheetDefaults
-import com.dokar.sheets.CoreBottomSheetLayout
 import com.dokar.sheets.DialogSheetBehaviors
 import com.dokar.sheets.PeekHeight
 import com.dokar.sheets.SheetBehaviors
+import com.dokar.sheets.CoreBottomSheet
+import com.dokar.sheets.CoreBottomSheetLayout
 import com.dokar.sheets.rememberBottomSheetState
 
 /**
