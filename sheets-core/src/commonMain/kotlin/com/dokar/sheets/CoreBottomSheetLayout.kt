@@ -134,6 +134,7 @@ fun CoreBottomSheetLayout(
 
     Box(
         modifier = Modifier
+            .nestedScroll(nestedScrollConnection)
             .then(
                 if (behaviors.allowOutsideInteraction) {
                     Modifier
@@ -141,7 +142,6 @@ fun CoreBottomSheetLayout(
                     Modifier
                         .fillMaxSize()
                         .drawBehind { drawRect(color = dimColor.copy(alpha = dimAlpha)) }
-                        .nestedScroll(nestedScrollConnection)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
