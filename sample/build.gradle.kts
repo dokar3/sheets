@@ -1,5 +1,4 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -11,9 +10,9 @@ plugins {
 kotlin {
     jvmToolchain(11)
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "sheets-sample"
+        outputModuleName.set("sheets-sample")
         browser {
             commonWebpackConfig {
                 outputFileName = "sheets-sample.js"
@@ -22,13 +21,7 @@ kotlin {
         binaries.executable()
     }
 
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
-    }
+    androidTarget()
 
     jvm("desktop")
 
@@ -38,8 +31,8 @@ kotlin {
                 implementation(project(":sheets-core"))
                 implementation(project(":sheets"))
                 implementation(project(":sheets-m3"))
-                implementation(compose.material)
-                implementation(compose.material3)
+                implementation(libs.compose.material)
+                implementation(libs.compose.material3)
             }
         }
 
@@ -70,7 +63,7 @@ android {
 
     defaultConfig {
         applicationId = "com.dokar.sheets.sample"
-        minSdk = 21
+        minSdk = 23
         targetSdk = rootProject.extra["target_sdk"] as Int
         versionCode = 1
         versionName = "1.0"

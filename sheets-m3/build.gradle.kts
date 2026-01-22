@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,9 +9,9 @@ plugins {
 kotlin {
     jvmToolchain(11)
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "sheets-m3"
+        outputModuleName.set("sheets-m3")
         browser {
             commonWebpackConfig {
                 outputFileName = "sheets-m3.js"
@@ -24,11 +22,6 @@ kotlin {
 
     androidTarget {
         publishLibraryVariants("release")
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
     }
 
     jvm("desktop")
@@ -38,7 +31,7 @@ kotlin {
 
         commonMain.dependencies {
             api(project(":sheets-core"))
-            api(compose.material3)
+            api(libs.compose.material3)
         }
         desktopMain.dependencies {
             api(compose.desktop.currentOs)

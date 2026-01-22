@@ -3,6 +3,7 @@ package com.dokar.sheets.sample
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
 fun App() {
     var dark by remember { mutableStateOf(false) }
 
-    val window = (LocalContext.current as Activity).window
+    val window = LocalActivity.current!!.window
     val view = LocalView.current
     val backgroundColor = if (dark) Color(0xff121212) else Color.White
     LaunchedEffect(dark, backgroundColor) {

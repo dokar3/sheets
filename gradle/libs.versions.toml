@@ -1,27 +1,33 @@
 [versions]
-activityCompose = "1.9.0"
-appcompat = "1.7.0"
-coilCompose = "2.7.0"
+activityCompose = "1.10.1"
+appcompat = "1.7.1"
+coilCompose = "3.3.0"
 composeCompiler = "1.5.11"
-coreKtx = "1.13.1"
-kotlin = "2.0.0"
-agp = "8.5.1"
-compose-plugin = "1.6.11"
-lifecycleRuntimeKtx = "2.8.3"
-material = "1.12.0"
-coroutines = "1.8.1"
+coreKtx = "1.17.0"
+kotlin = "2.3.0"
+agp = "9.0.0"
+compose-plugin = "1.10.0"
+lifecycleRuntimeKtx = "2.10.0"
+material = "1.13.0-alpha09"
+material3 = "1.9.0"
+coroutines = "1.10.2"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version = "2.0.0" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-plugin" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-plugin" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-plugin" }
+compose-ui-test-junit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "compose-plugin" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
 [plugins]
@@ -31,4 +37,4 @@ jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.29.0" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.36.0" }

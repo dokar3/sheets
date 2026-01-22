@@ -20,7 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,13 +40,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.decode.DataSource
-import coil.fetch.DrawableResult
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.request.Options
+import coil3.ImageLoader
+import coil3.asImage
+import coil3.compose.AsyncImage
+import coil3.decode.DataSource
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.ImageFetchResult
+import coil3.request.Options
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -67,8 +68,8 @@ private class IconFetcher(
     private val data: IconRequest,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult {
-        return DrawableResult(
-            drawable = data.resolveInfo.loadIcon(data.pkgMgr),
+        return ImageFetchResult(
+            image = data.resolveInfo.loadIcon(data.pkgMgr).asImage(),
             isSampled = true,
             dataSource = DataSource.DISK
         )
@@ -79,7 +80,7 @@ private class IconFetcher(
             data: IconRequest,
             options: Options,
             imageLoader: ImageLoader
-        ): Fetcher {
+        ): Fetcher? {
             return IconFetcher(data)
         }
     }
@@ -202,7 +203,7 @@ private fun VerticalIntentItem(info: ActivityInfo, colSize: Dp, onClick: () -> U
         modifier = Modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false)
+                indication = ripple(bounded = false)
             ) {
                 onClick()
             }

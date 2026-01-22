@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
-
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,9 +9,9 @@ plugins {
 kotlin {
     jvmToolchain(11)
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "sheets-core"
+        outputModuleName.set("sheets-core")
         browser {
             commonWebpackConfig {
                 outputFileName = "sheets-core.js"
@@ -24,11 +22,6 @@ kotlin {
 
     androidTarget {
         publishLibraryVariants("release")
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "11"
-            }
-        }
     }
 
     jvm("desktop")
@@ -41,8 +34,8 @@ kotlin {
 
         }
         commonMain.dependencies {
-            implementation(compose.foundation)
-            implementation(compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.ui)
             implementation(libs.kotlinx.coroutines.core)
         }
         desktopMain.dependencies {
@@ -54,7 +47,7 @@ kotlin {
         }
         val desktopTest by getting {
             dependencies {
-                implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.compose.ui.test.junit4)
             }
         }
     }
