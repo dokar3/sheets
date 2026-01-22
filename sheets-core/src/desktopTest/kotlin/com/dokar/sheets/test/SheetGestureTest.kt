@@ -79,6 +79,7 @@ class SheetGestureTest {
 
         composeTestRule.onNodeWithTag("contentRoot").assertExists().performTouchInput {
             // Tap outside of the sheet content
+            click() // Don't know why, but we need to click on the content first
             click(Offset(0f, -10f))
         }
 
