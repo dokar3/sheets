@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.layout.onSizeChanged
@@ -260,6 +261,8 @@ internal fun SampleScreen(
         }
     }
 
+    val brush = Brush.linearGradient(colors = listOf(Color(0xFFEDEAF9), Color(0xFF6E04D9)))
+
     val sheetModifier = Modifier.widthIn(max = maxWidth)
         .let {
             if (iosLike) {
@@ -278,7 +281,7 @@ internal fun SampleScreen(
                 state = state,
                 modifier = sheetModifier,
                 skipPeeked = skipPeeked,
-                showAboveKeyboard = showAboveKeyboard,
+                showAboveKeyboard = showAboveKeyboard
             ) {
                 content()
             }
@@ -291,6 +294,7 @@ internal fun SampleScreen(
                     modifier = sheetModifier,
                     skipPeeked = skipPeeked,
                     showAboveKeyboard = showAboveKeyboard,
+                    backgroundColor = brush
                 ) {
                     content()
                 }
