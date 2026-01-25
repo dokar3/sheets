@@ -1,6 +1,6 @@
 # Sheets
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.dokar3/sheets)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.dokar3/sheets?style=flat-square&color=%23ea197e)
 
 [Online Demo](https://dokar3.github.io/sheets/)
 
