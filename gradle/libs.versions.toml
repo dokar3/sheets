@@ -1,7 +1,7 @@
 [versions]
 activityCompose = "1.12.4"
 appcompat = "1.7.1"
-coilCompose = "3.3.0"
+coilCompose = "3.4.0"
 composeCompiler = "1.5.11"
 coreKtx = "1.17.0"
 kotlin = "2.3.10"
