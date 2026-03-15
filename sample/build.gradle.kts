@@ -93,11 +93,11 @@ android {
 
 compose.desktop {
     application {
-        mainClass = "com.dokar.sonner.sample.MainKt"
+        mainClass = "com.dokar.sheets.sample.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.dokar.sonner.sample"
+            packageName = "com.dokar.sheets.sample"
             packageVersion = "1.0.0"
         }
     }

@@ -2,6 +2,7 @@ package com.dokar.sheets
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 
 actual enum class SecureFlagPolicy {
     Inherit,
@@ -21,7 +22,10 @@ internal actual fun SheetHost(
     onDismissRequest: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Popup(onDismissRequest = onDismissRequest) {
+    Popup(
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(focusable = true),
+    ) {
         content()
     }
 }
