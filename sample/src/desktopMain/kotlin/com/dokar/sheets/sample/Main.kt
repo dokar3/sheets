@@ -19,7 +19,7 @@ fun main() = application {
 fun App() {
     var dark by remember { mutableStateOf(false) }
 
-    SampleScreen(
+    SampleApp(
         isDarkTheme = dark,
         onUpdateDarkTheme = { dark = it },
     )

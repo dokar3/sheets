@@ -107,11 +107,13 @@ fun CoreBottomSheetLayout(
     val topInset = WindowInsets.Companion.statusBars
 
     var contentRect by remember { mutableStateOf(Rect.Zero) }
+    val imeVisible = isImeVisible()
 
     SideEffect {
         state.peekHeight = peekHeight
         state.forceSkipPeeked = skipPeeked
         state.maxDimAmount = maxDimAmount
+        state.imeVisible = imeVisible
     }
 
     LaunchedEffect(state) {
@@ -127,6 +129,7 @@ fun CoreBottomSheetLayout(
         onDispose {
             state.visible = false
             state.contentHeight = 0
+            state.imeVisible = false
             coroutineScope.launch {
                 state.stopAnimations()
             }
@@ -300,11 +303,13 @@ fun CoreBottomSheetLayout(
     val topInset = WindowInsets.Companion.statusBars
 
     var contentRect by remember { mutableStateOf(Rect.Zero) }
+    val imeVisible = isImeVisible()
 
     SideEffect {
         state.peekHeight = peekHeight
         state.forceSkipPeeked = skipPeeked
         state.maxDimAmount = maxDimAmount
+        state.imeVisible = imeVisible
     }
 
     LaunchedEffect(state) {
@@ -320,6 +325,7 @@ fun CoreBottomSheetLayout(
         onDispose {
             state.visible = false
             state.contentHeight = 0
+            state.imeVisible = false
             coroutineScope.launch {
                 state.stopAnimations()
             }

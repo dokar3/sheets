@@ -13,6 +13,9 @@ expect val hasLightNavigationBar: Boolean
 internal expect fun currentTimeMillis(): Long
 
 @Composable
+internal expect fun isImeVisible(): Boolean
+
+@Composable
 internal expect fun SheetHost(
     state: BottomSheetState,
     behaviors: DialogSheetBehaviors,

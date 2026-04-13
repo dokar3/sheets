@@ -43,7 +43,7 @@ fun App() {
         ).isAppearanceLightStatusBars = !dark
     }
 
-    SampleScreen(
+    SampleApp(
         isDarkTheme = dark,
         onUpdateDarkTheme = { dark = it },
     )
