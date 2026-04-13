@@ -67,6 +67,8 @@ import kotlin.math.roundToInt
 internal fun SampleScreen(
     isDarkTheme: Boolean,
     onUpdateDarkTheme: (Boolean) -> Unit,
+    onOpenImeDemo: () -> Unit = {},
+    showImeDemoButton: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = if (isDarkTheme) Color(0xff121212) else Color.White
@@ -97,7 +99,7 @@ internal fun SampleScreen(
 
     Material3Surface(
         isDarkTheme = isDarkTheme,
-        backgroundColor = Color.Black,
+        backgroundColor = backgroundColor,
         modifier = Modifier.onSizeChanged { containerHeight = it.height },
     ) {
         Box(
@@ -110,7 +112,6 @@ internal fun SampleScreen(
                         it
                     }
                 }
-                .background(backgroundColor)
                 .verticalScroll(state = rememberScrollState())
                 .windowInsetsPadding(WindowInsets.systemBars),
             contentAlignment = Alignment.TopCenter,
@@ -216,6 +217,12 @@ internal fun SampleScreen(
 
                     Button(onClick = { scope.launch { state.expand(animate = withAnimation) } }) {
                         Text("Expand")
+                    }
+
+                    if (showImeDemoButton) {
+                        Button(onClick = onOpenImeDemo) {
+                            Text("Ime Delayed Expand")
+                        }
                     }
                 }
 

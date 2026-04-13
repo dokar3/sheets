@@ -12,7 +12,7 @@ fun main() {
     ComposeViewport(viewportContainerId = "ComposeTarget") {
         var dark by remember { mutableStateOf(false) }
 
-        SampleScreen(
+        SampleApp(
             isDarkTheme = dark,
             onUpdateDarkTheme = { dark = it },
         )

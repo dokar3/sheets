@@ -14,11 +14,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
@@ -45,7 +47,12 @@ fun rememberBottomSheetState(
         inputs = emptyArray(),
         saver = Saver(
             save = { BottomSheetState.save(it) },
-            restore = { BottomSheetState.restore(it) }
+            restore = {
+                BottomSheetState.restore(
+                    saveable = it,
+                    confirmValueChange = currentOnConfirmNextValue.value,
+                )
+            }
         ),
     ) {
         BottomSheetState(
@@ -84,6 +91,8 @@ class BottomSheetState(
 
     private var setValueJob: Job? = null
 
+    private var stateChangeVersion = 0L
+
     internal var expandAnimationSpec: AnimationSpec<Float>? = null
 
     internal var peekAnimationSpec: AnimationSpec<Float>? = null
@@ -91,6 +100,8 @@ class BottomSheetState(
     internal lateinit var peekHeight: PeekHeight
 
     internal var forceSkipPeeked: Boolean = false
+
+    internal var imeVisible by mutableStateOf(false)
 
     private var pendingToStartAnimation = false
 
@@ -195,6 +206,7 @@ class BottomSheetState(
     }
 
     internal suspend fun stopAnimations() {
+        stateChangeVersion++
         setValueJob?.cancel()
         if (offsetYAnimatable.isRunning) {
             offsetYAnimatable.stop()
@@ -237,6 +249,7 @@ class BottomSheetState(
      *
      * @param animate Set to false to disable the animation.
      * @param animationSpec The [AnimationSpec] of the animation.
+     * @param imeVisibleDelayFrames The number of frames to delay when IME is visible.
      */
     suspend fun expand(
         animate: Boolean = true,
@@ -244,10 +257,20 @@ class BottomSheetState(
             dampingRatio = 0.85f,
             stiffness = 370f
         ),
+        imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
+        val currentStateChangeVersion = stateChangeVersion
         expandAnimationSpec = animationSpec
         visible = true
+        if (imeVisible && imeVisibleDelayFrames > 0) {
+            delayIfImeVisible(imeVisibleDelayFrames)
+        }
+        // Another state change happened while waiting for IME frames, so this
+        // request is stale and should not continue to animate/open the sheet.
+        if (currentStateChangeVersion != stateChangeVersion) {
+            return
+        }
         val expectedNextValue = BottomSheetValue.Expanded
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -272,17 +295,28 @@ class BottomSheetState(
      *
      * @param animate Set to false to disable the animation.
      * @param animationSpec The [AnimationSpec] of the animation.
+     * @param imeVisibleDelayFrames The number of frames to delay when IME is visible.
      */
     suspend fun peek(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float> = spring(
             dampingRatio = 0.85f,
             stiffness = 370f
-        )
+        ),
+        imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
+        val currentStateChangeVersion = stateChangeVersion
         peekAnimationSpec = animationSpec
         visible = true
+        if (imeVisible && imeVisibleDelayFrames > 0) {
+            delayIfImeVisible(imeVisibleDelayFrames)
+        }
+        // Another state change happened while waiting for IME frames, so this
+        // request is stale and should not continue to animate/open the sheet.
+        if (currentStateChangeVersion != stateChangeVersion) {
+            return
+        }
         val expectedNextValue = BottomSheetValue.Peeked
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -307,6 +341,17 @@ class BottomSheetState(
         val velocityFactor = (abs(dragVelocity) / 25000f).coerceIn(0f, 1f)
         val newDuration = (duration - duration * 0.7f * velocityFactor).toInt()
         return tween(durationMillis = newDuration)
+    }
+
+    private suspend fun delayIfImeVisible(imeVisibleDelayFrames: Int) {
+        try {
+            repeat(imeVisibleDelayFrames) {
+                withFrameNanos { }
+            }
+        } catch (_: IllegalStateException) {
+            // Fallback when no frame clock is available in the coroutine context.
+            delay(imeVisibleDelayFrames * ApproxFrameDurationMillis)
+        }
     }
 
     private suspend fun setValue(
@@ -518,6 +563,8 @@ class BottomSheetState(
 
     companion object {
         private const val CollapseAnimDuration = 275
+        const val DefaultImeVisibleDelayFrames = 5
+        private const val ApproxFrameDurationMillis = 16L
 
         internal fun save(state: BottomSheetState): Any {
             return when (state.value) {
@@ -535,12 +582,20 @@ class BottomSheetState(
             }
         }
 
-        internal fun restore(saveable: Any): BottomSheetState {
+        internal fun restore(
+            saveable: Any,
+            confirmValueChange: ConfirmValueChange = { true },
+        ): BottomSheetState {
             val value = saveable as? BottomSheetValue
             return if (value != null) {
-                BottomSheetState(initialValue = value)
+                BottomSheetState(
+                    initialValue = value,
+                    confirmValueChange = confirmValueChange,
+                )
             } else {
-                BottomSheetState()
+                BottomSheetState(
+                    confirmValueChange = confirmValueChange,
+                )
             }
         }
     }

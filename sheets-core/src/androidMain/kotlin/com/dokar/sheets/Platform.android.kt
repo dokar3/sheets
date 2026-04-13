@@ -2,6 +2,9 @@ package com.dokar.sheets
 
 import android.os.Build
 import android.view.WindowManager
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +24,10 @@ actual val defaultWindowSoftInputMode: Int = WindowManager.LayoutParams.SOFT_INP
 actual val hasLightNavigationBar: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
 internal actual fun currentTimeMillis(): Long = System.currentTimeMillis()
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+internal actual fun isImeVisible(): Boolean = WindowInsets.isImeVisible
 
 @Composable
 internal actual fun SheetHost(

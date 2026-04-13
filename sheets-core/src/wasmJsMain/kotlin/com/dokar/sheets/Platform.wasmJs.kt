@@ -14,6 +14,9 @@ actual val hasLightNavigationBar: Boolean = false
 internal actual fun currentTimeMillis(): Long = org.jetbrains.skiko.currentNanoTime() / 1000_000
 
 @Composable
+internal actual fun isImeVisible(): Boolean = false
+
+@Composable
 internal actual fun SheetHost(
     state: BottomSheetState,
     behaviors: DialogSheetBehaviors,

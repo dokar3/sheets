@@ -45,12 +45,14 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling.preview)
                 implementation(libs.coil.compose)
+                implementation(libs.androidx.navigation3.ui)
             }
         }
 
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(libs.androidx.navigation3.ui)
             }
         }
     }

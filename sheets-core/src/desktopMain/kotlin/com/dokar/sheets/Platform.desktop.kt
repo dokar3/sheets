@@ -15,6 +15,9 @@ actual val hasLightNavigationBar: Boolean = false
 internal actual fun currentTimeMillis(): Long = System.currentTimeMillis()
 
 @Composable
+internal actual fun isImeVisible(): Boolean = false
+
+@Composable
 internal actual fun SheetHost(
     state: BottomSheetState,
     behaviors: DialogSheetBehaviors,
