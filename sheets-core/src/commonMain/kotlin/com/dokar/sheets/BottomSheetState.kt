@@ -43,7 +43,7 @@ fun rememberBottomSheetState(
     confirmValueChange: ConfirmValueChange = { true },
 ): BottomSheetState {
     val currentOnConfirmNextValue = rememberUpdatedState(confirmValueChange)
-    return rememberSaveable(
+    val state = rememberSaveable(
         inputs = emptyArray(),
         saver = Saver(
             save = { BottomSheetState.save(it) },
@@ -60,6 +60,8 @@ fun rememberBottomSheetState(
             confirmValueChange = currentOnConfirmNextValue.value,
         )
     }
+    state.confirmValueChange = currentOnConfirmNextValue.value
+    return state
 }
 
 /**
@@ -69,7 +71,7 @@ fun rememberBottomSheetState(
 @Stable
 class BottomSheetState(
     initialValue: BottomSheetValue = BottomSheetValue.Collapsed,
-    private val confirmValueChange: ConfirmValueChange = { true },
+    internal var confirmValueChange: ConfirmValueChange = { true },
 ) {
     /**
      * The visible state of the sheet.
