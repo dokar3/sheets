@@ -99,7 +99,7 @@ internal fun SampleScreen(
 
     Material3Surface(
         isDarkTheme = isDarkTheme,
-        backgroundColor = backgroundColor,
+        backgroundColor = Color.Black, // black background for ios style sheets
         modifier = Modifier.onSizeChanged { containerHeight = it.height },
     ) {
         Box(
@@ -112,6 +112,7 @@ internal fun SampleScreen(
                         it
                     }
                 }
+                .background(backgroundColor)
                 .verticalScroll(state = rememberScrollState())
                 .windowInsetsPadding(WindowInsets.systemBars),
             contentAlignment = Alignment.TopCenter,
