@@ -24,6 +24,16 @@ kotlin {
     androidTarget()
 
     jvm("desktop")
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "SheetsSample"
+            isStatic = true
+        }
+    }
 
     sourceSets {
         val commonMain by getting {

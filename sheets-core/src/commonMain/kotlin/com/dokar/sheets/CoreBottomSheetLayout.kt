@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBars
@@ -317,7 +319,8 @@ fun CoreBottomSheetLayout(
                     modifier = modifier
                         .fillMaxWidth()
                         .sheetBackgroundWithInsets(
-                            navigationBarInsets = WindowInsets.navigationBars,
+                            navigationBarInsets = WindowInsets.navigationBars
+                                .exclude(WindowInsets.ime),
                             backgroundShape = shape,
                             extendsIntoNavigationBar = behaviors.extendsIntoNavigationBar,
                             sheetBackground = sheetBackground,
