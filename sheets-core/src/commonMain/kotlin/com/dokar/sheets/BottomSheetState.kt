@@ -18,10 +18,12 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -103,7 +105,8 @@ class BottomSheetState(
 
     internal var forceSkipPeeked: Boolean = false
 
-    internal var imeVisible by mutableStateOf(false)
+    internal var hasImeVisibilityUpdated = false
+    internal var imeVisible = false
 
     private var pendingToStartAnimation = false
 
@@ -125,6 +128,8 @@ class BottomSheetState(
 
     internal var animState by mutableStateOf(AnimState.None)
         private set
+
+    internal var isTransitionAnimated = false
 
     /**
      * Be true if the sheet is peeking.
@@ -265,7 +270,7 @@ class BottomSheetState(
         val currentStateChangeVersion = stateChangeVersion
         expandAnimationSpec = animationSpec
         visible = true
-        if (imeVisible && imeVisibleDelayFrames > 0) {
+        if (animate) {
             delayIfImeVisible(imeVisibleDelayFrames)
         }
         // Another state change happened while waiting for IME frames, so this
@@ -311,7 +316,7 @@ class BottomSheetState(
         val currentStateChangeVersion = stateChangeVersion
         peekAnimationSpec = animationSpec
         visible = true
-        if (imeVisible && imeVisibleDelayFrames > 0) {
+        if (animate) {
             delayIfImeVisible(imeVisibleDelayFrames)
         }
         // Another state change happened while waiting for IME frames, so this
@@ -346,13 +351,30 @@ class BottomSheetState(
     }
 
     private suspend fun delayIfImeVisible(imeVisibleDelayFrames: Int) {
+        if (imeVisibleDelayFrames <= 0) return
+
+        val delayDurationMillis = imeVisibleDelayFrames * ApproxFrameDurationMillis
         try {
-            repeat(imeVisibleDelayFrames) {
-                withFrameNanos { }
+            if (!imeVisible) {
+                if (hasImeVisibilityUpdated) {
+                    return
+                }
+                while (!hasImeVisibilityUpdated) {
+                    withFrameNanos {}
+                }
+                if (!imeVisible) {
+                    return
+                }
             }
+            withTimeout(delayDurationMillis) {
+                repeat(imeVisibleDelayFrames) {
+                    withFrameNanos { }
+                }
+            }
+        } catch (_: TimeoutCancellationException) {
         } catch (_: IllegalStateException) {
             // Fallback when no frame clock is available in the coroutine context.
-            delay(imeVisibleDelayFrames * ApproxFrameDurationMillis)
+            delay(delayDurationMillis)
         }
     }
 
@@ -361,6 +383,7 @@ class BottomSheetState(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float>
     ): Job {
+        this.isTransitionAnimated = animate
         this.animState = when (value) {
             BottomSheetValue.Expanded -> {
                 AnimState.Expanding

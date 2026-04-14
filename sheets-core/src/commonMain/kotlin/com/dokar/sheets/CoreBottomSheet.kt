@@ -11,7 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -49,59 +52,23 @@ fun CoreBottomSheet(
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
-    if (!state.visible) {
-        return
-    }
-    val scope = rememberCoroutineScope()
-
-    val currentState by rememberUpdatedState(state)
-    val currentSkipPeek by rememberUpdatedState(skipPeeked)
-    val currentPeekHeight by rememberUpdatedState(peekHeight)
-    val currentShape by rememberUpdatedState(shape)
-    val currentBackgroundColor by rememberUpdatedState(backgroundColor)
-    val currentDimColor by rememberUpdatedState(dimColor)
-    val currentMaxDimAmount by rememberUpdatedState(maxDimAmount)
-    val currentDragHandle by rememberUpdatedState(dragHandle)
-    val currentContent by rememberUpdatedState(content)
-
-    val onDismissRequest: () -> Unit = remember(state) {
-        {
-            if (state.value == BottomSheetValue.Expanded
-                && !state.shouldSkipPeekedState()
-                && !state.isPeeking
-            ) {
-                scope.launch {
-                    state.peek()
-                }
-            } else if (state.value != BottomSheetValue.Collapsed) {
-                scope.launch {
-                    state.collapse()
-                }
-            }
-        }
-    }
-
-    SheetHost(
+    CoreBottomSheet(
         state = state,
+        modifier = modifier,
+        skipPeeked = skipPeeked,
+        peekHeight = peekHeight,
+        shape = shape,
+        sheetBackground = { outline ->
+            drawOutline(outline = outline, color = backgroundColor)
+        },
+        dimColor = dimColor,
+        maxDimAmount = maxDimAmount,
         behaviors = behaviors,
+        contentAlignment = contentAlignment,
         showAboveKeyboard = showAboveKeyboard,
-        onDismissRequest = onDismissRequest,
-    ) {
-        CoreBottomSheetLayout(
-            state = currentState,
-            modifier = if (showAboveKeyboard) modifier.imePadding() else modifier,
-            skipPeeked = currentSkipPeek,
-            peekHeight = currentPeekHeight,
-            shape = currentShape,
-            backgroundColor = currentBackgroundColor,
-            dimColor = currentDimColor,
-            maxDimAmount = currentMaxDimAmount,
-            behaviors = behaviors,
-            contentAlignment = contentAlignment,
-            dragHandle = currentDragHandle,
-            content = currentContent
-        )
-    }
+        dragHandle = dragHandle,
+        content = content,
+    )
 }
 
 
@@ -139,6 +106,63 @@ fun CoreBottomSheet(
     dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
     content: @Composable () -> Unit
 ) {
+    CoreBottomSheet(
+        state = state,
+        modifier = modifier,
+        skipPeeked = skipPeeked,
+        peekHeight = peekHeight,
+        shape = shape,
+        sheetBackground = { outline ->
+            drawOutline(outline = outline, brush = backgroundColor)
+        },
+        dimColor = dimColor,
+        maxDimAmount = maxDimAmount,
+        behaviors = behaviors,
+        contentAlignment = contentAlignment,
+        showAboveKeyboard = showAboveKeyboard,
+        dragHandle = dragHandle,
+        content = content,
+    )
+}
+
+/**
+ * A bottom sheet will be displayed in a dialog window.
+ *
+ * This shared overload lets callers inject the sheet surface drawing while reusing the same
+ * dialog host, dismissal handling, and layout path used by the color and brush wrappers.
+ *
+ * @param state The bottom sheet state. Call [rememberBottomSheetState] to create one.
+ * @param modifier Modifier for bottom sheet content.
+ * @param skipPeeked Skip the peeked state if set to true. Defaults to false.
+ * @param peekHeight Peek height, could be a dp, px, or fraction value.
+ * @param shape Sheet shape used to resolve the content corner radius.
+ * @param sheetBackground Drawing lambda for the sheet surface background.
+ * @param dimColor Dim color. Defaults to [Color.Black].
+ * @param maxDimAmount Maximum dim amount. Defaults to 0.45f.
+ * @param behaviors Dialog sheet behaviors. Including system bars, clicking, window input mode, etc.
+ * @param contentAlignment The alignment of the content. Only works when the content width is
+ * smaller than the screen width.
+ * @param showAboveKeyboard Controls whether the whole bottom sheet should show above the soft
+ * keyboard when the keyboard is shown. Defaults to false.
+ * @param dragHandle Bottom sheet drag handle. A round bar was displayed by default.
+ * @param content Sheet content.
+ */
+@Composable
+fun CoreBottomSheet(
+    state: BottomSheetState,
+    modifier: Modifier = Modifier,
+    skipPeeked: Boolean = false,
+    peekHeight: PeekHeight = PeekHeight.fraction(0.5f),
+    shape: Shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+    sheetBackground: DrawScope.(outline: Outline) -> Unit,
+    dimColor: Color = Color.Black,
+    maxDimAmount: Float = CoreBottomSheetDefaults.MaxDimAmount,
+    behaviors: DialogSheetBehaviors = CoreBottomSheetDefaults.dialogSheetBehaviors(),
+    contentAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    showAboveKeyboard: Boolean = false,
+    dragHandle: @Composable () -> Unit = { CoreBottomSheetDragHandle() },
+    content: @Composable () -> Unit
+) {
     if (!state.visible) {
         return
     }
@@ -148,11 +172,11 @@ fun CoreBottomSheet(
     val currentSkipPeek by rememberUpdatedState(skipPeeked)
     val currentPeekHeight by rememberUpdatedState(peekHeight)
     val currentShape by rememberUpdatedState(shape)
-    val currentBackgroundColor by rememberUpdatedState(backgroundColor)
     val currentDimColor by rememberUpdatedState(dimColor)
     val currentMaxDimAmount by rememberUpdatedState(maxDimAmount)
     val currentDragHandle by rememberUpdatedState(dragHandle)
     val currentContent by rememberUpdatedState(content)
+    val currentSheetBackground by rememberUpdatedState(sheetBackground)
 
     val onDismissRequest: () -> Unit = remember(state) {
         {
@@ -183,13 +207,13 @@ fun CoreBottomSheet(
             skipPeeked = currentSkipPeek,
             peekHeight = currentPeekHeight,
             shape = currentShape,
-            backgroundColor = currentBackgroundColor,
+            sheetBackground = currentSheetBackground,
             dimColor = currentDimColor,
             maxDimAmount = currentMaxDimAmount,
             behaviors = behaviors,
             contentAlignment = contentAlignment,
             dragHandle = currentDragHandle,
-            content = currentContent
+            content = currentContent,
         )
     }
 }

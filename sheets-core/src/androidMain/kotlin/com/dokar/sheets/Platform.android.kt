@@ -29,6 +29,7 @@ internal actual fun currentTimeMillis(): Long = System.currentTimeMillis()
 @Composable
 internal actual fun isImeVisible(): Boolean = WindowInsets.isImeVisible
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal actual fun SheetHost(
     state: BottomSheetState,
@@ -79,6 +80,8 @@ internal actual fun SheetHost(
         }
     }
 
+    val isImeVisible = WindowInsets.isImeVisible
+
     LaunchedEffect(state.visible, dialog.isShowing) {
         if (state.visible && !dialog.isShowing) {
             dialog.show()
@@ -94,6 +97,8 @@ internal actual fun SheetHost(
     }
 
     SideEffect {
+        state.imeVisible = isImeVisible
+        state.hasImeVisibilityUpdated = true
         dialog.updateParameters(
             onDismissRequest = onDismissRequest,
             behaviors = finalBehaviors,

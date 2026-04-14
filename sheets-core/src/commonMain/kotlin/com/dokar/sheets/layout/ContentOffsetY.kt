@@ -1,7 +1,5 @@
 package com.dokar.sheets.layout
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -16,7 +14,6 @@ internal fun computeContentOffsetY(
     coroutineScope: CoroutineScope,
     density: Density,
     initialOffsetY: Float,
-    contentAlpha: Animatable<Float, AnimationVector1D>,
     size: IntSize,
 ): Int {
     if (state.contentHeight == size.height) {
@@ -47,21 +44,10 @@ internal fun computeContentOffsetY(
         if (isAnimating) {
             val animSpec = state.expandAnimationSpec
             if (animSpec != null) {
-                coroutineScope.launch {
-                    contentAlpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = animSpec,
-                    )
-                }
                 state.expand(animationSpec = animSpec)
             } else {
-                coroutineScope.launch {
-                    contentAlpha.animateTo(1f)
-                }
                 state.expand()
             }
-        } else {
-            contentAlpha.snapTo(1f)
         }
     }
 
@@ -73,21 +59,10 @@ internal fun computeContentOffsetY(
         if (isAnimating) {
             val animSpec = state.peekAnimationSpec
             if (animSpec != null) {
-                coroutineScope.launch {
-                    contentAlpha.animateTo(
-                        targetValue = 1f,
-                        animationSpec = animSpec,
-                    )
-                }
                 state.peek(animationSpec = animSpec)
             } else {
-                coroutineScope.launch {
-                    contentAlpha.snapTo(1f)
-                }
                 state.peek()
             }
-        } else {
-            contentAlpha.snapTo(1f)
         }
     }
 
@@ -114,7 +89,13 @@ internal fun computeContentOffsetY(
 
         BottomSheetValue.Collapsed -> {
             val offsetY = size.height
-            coroutineScope.launch { state.addOffsetY(offsetY) }
+            coroutineScope.launch {
+                //Ensure we only snap it if the sheet hasn't started expanding
+                // in the meantime due to IME delay suspension recovery handling
+                if (!state.isAnimating && state.value == BottomSheetValue.Collapsed) {
+                    state.setOffsetY(offsetY)
+                }
+            }
             offsetY
         }
     }
