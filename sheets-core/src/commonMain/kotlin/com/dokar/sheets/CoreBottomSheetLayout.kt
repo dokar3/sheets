@@ -394,22 +394,28 @@ private suspend fun Animatable<Float, AnimationVector1D>.updateBySheetState(
     state: BottomSheetState,
 ) {
     when {
-        animState == BottomSheetState.AnimState.Expanding ||
-                value == BottomSheetValue.Expanded -> {
+        animState == BottomSheetState.AnimState.Expanding -> {
             showContent(
-                isAnimating = animState == BottomSheetState.AnimState.Expanding,
+                animate = state.isTransitionAnimated,
                 animationSpec = state.expandAnimationSpec,
                 animateWithDefaultSpec = true,
             )
         }
 
-        animState == BottomSheetState.AnimState.Peeking ||
-                value == BottomSheetValue.Peeked -> {
+        value == BottomSheetValue.Expanded -> {
+            snapTo(1f)
+        }
+
+        animState == BottomSheetState.AnimState.Peeking -> {
             showContent(
-                isAnimating = animState == BottomSheetState.AnimState.Peeking,
+                animate = state.isTransitionAnimated,
                 animationSpec = state.peekAnimationSpec,
                 animateWithDefaultSpec = false,
             )
+        }
+
+        value == BottomSheetValue.Peeked -> {
+            snapTo(1f)
         }
 
         animState == BottomSheetState.AnimState.Collapsing -> {}
@@ -421,21 +427,19 @@ private suspend fun Animatable<Float, AnimationVector1D>.updateBySheetState(
 }
 
 private suspend fun Animatable<Float, AnimationVector1D>.showContent(
-    isAnimating: Boolean,
+    animate: Boolean,
     animationSpec: AnimationSpec<Float>?,
     animateWithDefaultSpec: Boolean,
 ) {
-    if (isAnimating) {
-        if (animationSpec != null) {
-            animateTo(
-                targetValue = 1f,
-                animationSpec = animationSpec,
-            )
-        } else if (animateWithDefaultSpec) {
-            animateTo(1f)
-        } else {
-            snapTo(1f)
-        }
+    if (!animate) {
+        snapTo(1f)
+    } else if (animationSpec != null) {
+        animateTo(
+            targetValue = 1f,
+            animationSpec = animationSpec,
+        )
+    } else if (animateWithDefaultSpec) {
+        animateTo(1f)
     } else {
         snapTo(1f)
     }

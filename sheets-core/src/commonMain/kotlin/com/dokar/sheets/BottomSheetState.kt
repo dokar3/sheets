@@ -127,6 +127,8 @@ class BottomSheetState(
     internal var animState by mutableStateOf(AnimState.None)
         private set
 
+    internal var isTransitionAnimated = false
+
     /**
      * Be true if the sheet is peeking.
      */
@@ -375,6 +377,7 @@ class BottomSheetState(
         animate: Boolean = true,
         animationSpec: AnimationSpec<Float>
     ): Job {
+        this.isTransitionAnimated = animate
         this.animState = when (value) {
             BottomSheetValue.Expanded -> {
                 AnimState.Expanding
