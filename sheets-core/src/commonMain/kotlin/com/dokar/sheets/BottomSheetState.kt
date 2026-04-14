@@ -93,8 +93,6 @@ class BottomSheetState(
 
     private var setValueJob: Job? = null
 
-    private var stateChangeVersion = 0L
-
     internal var expandAnimationSpec: AnimationSpec<Float>? = null
 
     internal var peekAnimationSpec: AnimationSpec<Float>? = null
@@ -103,7 +101,8 @@ class BottomSheetState(
 
     internal var forceSkipPeeked: Boolean = false
 
-    internal var imeVisible by mutableStateOf(false)
+    internal var hasImeVisibilityUpdated = false
+    internal var imeVisible = false
 
     private var pendingToStartAnimation = false
 
@@ -208,7 +207,6 @@ class BottomSheetState(
     }
 
     internal suspend fun stopAnimations() {
-        stateChangeVersion++
         setValueJob?.cancel()
         if (offsetYAnimatable.isRunning) {
             offsetYAnimatable.stop()
@@ -262,17 +260,9 @@ class BottomSheetState(
         imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
-        val currentStateChangeVersion = stateChangeVersion
         expandAnimationSpec = animationSpec
         visible = true
-        if (imeVisible && imeVisibleDelayFrames > 0) {
-            delayIfImeVisible(imeVisibleDelayFrames)
-        }
-        // Another state change happened while waiting for IME frames, so this
-        // request is stale and should not continue to animate/open the sheet.
-        if (currentStateChangeVersion != stateChangeVersion) {
-            return
-        }
+        delayIfImeVisible(imeVisibleDelayFrames)
         val expectedNextValue = BottomSheetValue.Expanded
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -308,17 +298,9 @@ class BottomSheetState(
         imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
-        val currentStateChangeVersion = stateChangeVersion
         peekAnimationSpec = animationSpec
         visible = true
-        if (imeVisible && imeVisibleDelayFrames > 0) {
-            delayIfImeVisible(imeVisibleDelayFrames)
-        }
-        // Another state change happened while waiting for IME frames, so this
-        // request is stale and should not continue to animate/open the sheet.
-        if (currentStateChangeVersion != stateChangeVersion) {
-            return
-        }
+        delayIfImeVisible(imeVisibleDelayFrames)
         val expectedNextValue = BottomSheetValue.Peeked
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -346,7 +328,20 @@ class BottomSheetState(
     }
 
     private suspend fun delayIfImeVisible(imeVisibleDelayFrames: Int) {
+        if (imeVisibleDelayFrames <= 0) return
+
         try {
+            if (!imeVisible) {
+                if (hasImeVisibilityUpdated) {
+                    return
+                }
+                while(!hasImeVisibilityUpdated) {
+                    withFrameNanos {}
+                }
+                if (!imeVisible) {
+                    return
+                }
+            }
             repeat(imeVisibleDelayFrames) {
                 withFrameNanos { }
             }

@@ -1,6 +1,8 @@
 package com.dokar.sheets
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -49,8 +51,8 @@ import androidx.compose.ui.unit.toSize
 import com.dokar.sheets.layout.SheetContentLayout
 import com.dokar.sheets.layout.computeContentOffsetY
 import com.dokar.sheets.layout.rememberSheetContentLayoutState
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
@@ -114,22 +116,17 @@ fun CoreBottomSheetLayout(
         state.forceSkipPeeked = skipPeeked
         state.maxDimAmount = maxDimAmount
         state.imeVisible = imeVisible
+        state.hasImeVisibilityUpdated = true
     }
 
-    LaunchedEffect(state) {
-        launch {
-            snapshotFlow { state.value }
-                .distinctUntilChanged()
-                .filter { it == BottomSheetValue.Collapsed }
-                .collect { contentAlpha.snapTo(0f) }
-        }
-    }
+    UpdateContentAlpha(state = state, contentAlpha = contentAlpha)
 
     DisposableEffect(state) {
         onDispose {
             state.visible = false
             state.contentHeight = 0
             state.imeVisible = false
+            state.hasImeVisibilityUpdated = false
             coroutineScope.launch {
                 state.stopAnimations()
             }
@@ -207,7 +204,6 @@ fun CoreBottomSheetLayout(
                         coroutineScope = coroutineScope,
                         density = density,
                         initialOffsetY = initialOffsetY,
-                        contentAlpha = contentAlpha,
                         size = size,
                     )
                 },
@@ -310,22 +306,17 @@ fun CoreBottomSheetLayout(
         state.forceSkipPeeked = skipPeeked
         state.maxDimAmount = maxDimAmount
         state.imeVisible = imeVisible
+        state.hasImeVisibilityUpdated = true
     }
 
-    LaunchedEffect(state) {
-        launch {
-            snapshotFlow { state.value }
-                .distinctUntilChanged()
-                .filter { it == BottomSheetValue.Collapsed }
-                .collect { contentAlpha.snapTo(0f) }
-        }
-    }
+    UpdateContentAlpha(state = state, contentAlpha = contentAlpha)
 
     DisposableEffect(state) {
         onDispose {
             state.visible = false
             state.contentHeight = 0
             state.imeVisible = false
+            state.hasImeVisibilityUpdated = false
             coroutineScope.launch {
                 state.stopAnimations()
             }
@@ -403,7 +394,6 @@ fun CoreBottomSheetLayout(
                         coroutineScope = coroutineScope,
                         density = density,
                         initialOffsetY = initialOffsetY,
-                        contentAlpha = contentAlpha,
                         size = size,
                     )
                 },
@@ -443,5 +433,95 @@ fun CoreBottomSheetLayout(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun UpdateContentAlpha(
+    state: BottomSheetState,
+    contentAlpha: Animatable<Float, AnimationVector1D>,
+) {
+    LaunchedEffect(state, contentAlpha) {
+        var previousAnimState = state.animState
+        snapshotFlow { state.value to state.animState }
+            .distinctUntilChanged()
+            .collectLatest { (value, animState) ->
+                val oldAnimState = previousAnimState
+                previousAnimState = animState
+                val targetValue = oldAnimState.targetValue()
+                if (targetValue != null &&
+                    animState == BottomSheetState.AnimState.None &&
+                    value != targetValue
+                ) {
+                    return@collectLatest
+                }
+                contentAlpha.updateBySheetState(
+                    value = value,
+                    animState = animState,
+                    state = state,
+                )
+            }
+    }
+}
+
+private fun BottomSheetState.AnimState.targetValue(): BottomSheetValue? {
+    return when (this) {
+        BottomSheetState.AnimState.Expanding -> BottomSheetValue.Expanded
+        BottomSheetState.AnimState.Peeking -> BottomSheetValue.Peeked
+        BottomSheetState.AnimState.Collapsing -> BottomSheetValue.Collapsed
+        BottomSheetState.AnimState.None -> null
+    }
+}
+
+private suspend fun Animatable<Float, AnimationVector1D>.updateBySheetState(
+    value: BottomSheetValue,
+    animState: BottomSheetState.AnimState,
+    state: BottomSheetState,
+) {
+    when {
+        animState == BottomSheetState.AnimState.Expanding ||
+                value == BottomSheetValue.Expanded -> {
+            showContent(
+                isAnimating = animState == BottomSheetState.AnimState.Expanding,
+                animationSpec = state.expandAnimationSpec,
+                animateWithDefaultSpec = true,
+            )
+        }
+
+        animState == BottomSheetState.AnimState.Peeking ||
+                value == BottomSheetValue.Peeked -> {
+            showContent(
+                isAnimating = animState == BottomSheetState.AnimState.Peeking,
+                animationSpec = state.peekAnimationSpec,
+                animateWithDefaultSpec = false,
+            )
+        }
+
+        animState == BottomSheetState.AnimState.Collapsing -> {}
+
+        value == BottomSheetValue.Collapsed -> {
+            snapTo(0f)
+        }
+    }
+}
+
+private suspend fun Animatable<Float, AnimationVector1D>.showContent(
+    isAnimating: Boolean,
+    animationSpec: AnimationSpec<Float>?,
+    animateWithDefaultSpec: Boolean,
+) {
+    if (isAnimating) {
+        if (animationSpec != null) {
+            animateTo(
+                targetValue = 1f,
+                animationSpec = animationSpec,
+            )
+        } else if (animateWithDefaultSpec) {
+            animateTo(1f)
+        } else {
+            snapTo(1f)
+        }
+    } else {
+        snapTo(1f)
     }
 }

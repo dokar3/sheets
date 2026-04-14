@@ -1,6 +1,7 @@
 package com.dokar.sheets
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.window.Popup
 
 actual enum class SecureFlagPolicy {
@@ -24,6 +25,11 @@ internal actual fun SheetHost(
     onDismissRequest: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    SideEffect {
+        state.imeVisible = false
+        state.hasImeVisibilityUpdated = true
+    }
+
     Popup(onDismissRequest = onDismissRequest) {
         content()
     }
