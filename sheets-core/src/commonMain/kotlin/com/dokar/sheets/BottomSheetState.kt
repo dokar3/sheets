@@ -93,6 +93,8 @@ class BottomSheetState(
 
     private var setValueJob: Job? = null
 
+    private var stateChangeVersion = 0L
+
     internal var expandAnimationSpec: AnimationSpec<Float>? = null
 
     internal var peekAnimationSpec: AnimationSpec<Float>? = null
@@ -207,6 +209,7 @@ class BottomSheetState(
     }
 
     internal suspend fun stopAnimations() {
+        stateChangeVersion++
         setValueJob?.cancel()
         if (offsetYAnimatable.isRunning) {
             offsetYAnimatable.stop()
@@ -260,9 +263,17 @@ class BottomSheetState(
         imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
+        val currentStateChangeVersion = stateChangeVersion
         expandAnimationSpec = animationSpec
         visible = true
-        delayIfImeVisible(imeVisibleDelayFrames)
+        if (animate) {
+            delayIfImeVisible(imeVisibleDelayFrames)
+        }
+        // Another state change happened while waiting for IME frames, so this
+        // request is stale and should not continue to animate/open the sheet.
+        if (currentStateChangeVersion != stateChangeVersion) {
+            return
+        }
         val expectedNextValue = BottomSheetValue.Expanded
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -298,9 +309,17 @@ class BottomSheetState(
         imeVisibleDelayFrames: Int = DefaultImeVisibleDelayFrames,
     ) {
         stopAnimations()
+        val currentStateChangeVersion = stateChangeVersion
         peekAnimationSpec = animationSpec
         visible = true
-        delayIfImeVisible(imeVisibleDelayFrames)
+        if (animate) {
+            delayIfImeVisible(imeVisibleDelayFrames)
+        }
+        // Another state change happened while waiting for IME frames, so this
+        // request is stale and should not continue to animate/open the sheet.
+        if (currentStateChangeVersion != stateChangeVersion) {
+            return
+        }
         val expectedNextValue = BottomSheetValue.Peeked
         val nextValue = if (confirmValueChange(expectedNextValue)) {
             expectedNextValue
@@ -335,7 +354,7 @@ class BottomSheetState(
                 if (hasImeVisibilityUpdated) {
                     return
                 }
-                while(!hasImeVisibilityUpdated) {
+                while (!hasImeVisibilityUpdated) {
                     withFrameNanos {}
                 }
                 if (!imeVisible) {
