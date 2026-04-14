@@ -40,4 +40,3 @@ internal fun Modifier.drawSheetBackground(
         onDrawBehind { sheetBackground(outline) }
     }
 }
-
