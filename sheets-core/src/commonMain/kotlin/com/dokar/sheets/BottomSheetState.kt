@@ -18,10 +18,12 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -351,6 +353,7 @@ class BottomSheetState(
     private suspend fun delayIfImeVisible(imeVisibleDelayFrames: Int) {
         if (imeVisibleDelayFrames <= 0) return
 
+        val delayDurationMillis = imeVisibleDelayFrames * ApproxFrameDurationMillis
         try {
             if (!imeVisible) {
                 if (hasImeVisibilityUpdated) {
@@ -363,12 +366,15 @@ class BottomSheetState(
                     return
                 }
             }
-            repeat(imeVisibleDelayFrames) {
-                withFrameNanos { }
+            withTimeout(delayDurationMillis) {
+                repeat(imeVisibleDelayFrames) {
+                    withFrameNanos { }
+                }
             }
+        } catch (_: TimeoutCancellationException) {
         } catch (_: IllegalStateException) {
             // Fallback when no frame clock is available in the coroutine context.
-            delay(imeVisibleDelayFrames * ApproxFrameDurationMillis)
+            delay(delayDurationMillis)
         }
     }
 
