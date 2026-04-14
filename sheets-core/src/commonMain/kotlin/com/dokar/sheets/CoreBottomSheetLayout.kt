@@ -35,13 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -50,7 +50,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.dokar.sheets.layout.SheetContentLayout
 import com.dokar.sheets.layout.computeContentOffsetY
 import com.dokar.sheets.layout.rememberSheetContentLayoutState
@@ -364,6 +363,8 @@ private fun UpdateContentAlpha(
                 val oldAnimState = previousAnimState
                 previousAnimState = animState
                 val targetValue = oldAnimState.targetValue()
+                // Skip update if the previous animation was interrupted before reaching its target.
+                // This avoids incorrect alpha changes when, e.g., collapsing while expanding.
                 if (targetValue != null &&
                     animState == BottomSheetState.AnimState.None &&
                     value != targetValue
