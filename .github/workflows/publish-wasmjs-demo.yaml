@@ -18,7 +18,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: 'true'
 
@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew :sample:wasmJsBrowserDistribution
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: 'sample/build/dist/wasmJs/productionExecutable'
 
