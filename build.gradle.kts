@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     extra.apply {
-        set("compile_sdk", 36)
+        set("compile_sdk", 37)
         set("target_sdk", 36)
     }
 }
