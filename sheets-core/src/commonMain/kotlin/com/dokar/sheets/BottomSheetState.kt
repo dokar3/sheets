@@ -479,8 +479,9 @@ class BottomSheetState(
         addOffsetY(calcTargetAnimValues(newValue).offsetY)
     }
 
-    internal suspend fun onDragStopped() = coroutineScope {
+    internal suspend fun onDragStopped(velocity: Float = dragVelocity) = coroutineScope {
         onDragStoppedJob?.cancel()
+        dragVelocity = velocity
         onDragStoppedJob = launch {
             when (nextValue()) {
                 BottomSheetValue.Expanded -> {

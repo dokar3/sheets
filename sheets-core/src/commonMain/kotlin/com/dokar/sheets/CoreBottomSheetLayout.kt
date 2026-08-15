@@ -342,7 +342,7 @@ fun CoreBottomSheetLayout(
                             },
                             orientation = Orientation.Vertical,
                             onDragStarted = {},
-                            onDragStopped = { state.onDragStopped() },
+                            onDragStopped = { velocity -> state.onDragStopped(velocity) },
                         ),
                 ) {
                     dragHandle()

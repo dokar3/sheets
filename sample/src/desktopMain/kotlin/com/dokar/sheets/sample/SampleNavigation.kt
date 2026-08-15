@@ -37,12 +37,26 @@ internal actual fun SampleApp(
                         onOpenImeDemo = {
                             backStack.add(SampleRoute.ChatDemo)
                         },
+                        onOpenEmbeddedSheetDemo = {
+                            backStack.add(SampleRoute.EmbeddedSheet)
+                        },
                     )
                 }
             }
 
             entry<SampleRoute.ChatDemo> {
                 ImeExpandDemoScreen(
+                    isDarkTheme = isDarkTheme,
+                    onBack = {
+                        if (backStack.size > 1) {
+                            backStack.removeAt(backStack.lastIndex)
+                        }
+                    },
+                )
+            }
+
+            entry<SampleRoute.EmbeddedSheet> {
+                EmbeddedSheetDemoScreen(
                     isDarkTheme = isDarkTheme,
                     onBack = {
                         if (backStack.size > 1) {
@@ -58,4 +72,5 @@ internal actual fun SampleApp(
 private sealed interface SampleRoute {
     data object Home : SampleRoute
     data object ChatDemo : SampleRoute
+    data object EmbeddedSheet : SampleRoute
 }

@@ -1,14 +1,11 @@
 package com.dokar.sheets.sample
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Button
-import androidx.compose.material3.Text
-import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -33,12 +30,26 @@ internal actual fun SampleApp(
                         onOpenImeDemo = {
                             backStack.add(SampleRoute.ChatDemo)
                         },
+                        onOpenEmbeddedSheetDemo = {
+                            backStack.add(SampleRoute.EmbeddedSheet)
+                        },
                     )
                 }
             }
 
             entry<SampleRoute.ChatDemo> {
                 ImeExpandDemoScreen(
+                    isDarkTheme = isDarkTheme,
+                    onBack = {
+                        if (backStack.size > 1) {
+                            backStack.removeAt(backStack.lastIndex)
+                        }
+                    },
+                )
+            }
+
+            entry<SampleRoute.EmbeddedSheet> {
+                EmbeddedSheetDemoScreen(
                     isDarkTheme = isDarkTheme,
                     onBack = {
                         if (backStack.size > 1) {
@@ -54,4 +65,5 @@ internal actual fun SampleApp(
 private sealed interface SampleRoute {
     data object Home : SampleRoute
     data object ChatDemo : SampleRoute
+    data object EmbeddedSheet : SampleRoute
 }
