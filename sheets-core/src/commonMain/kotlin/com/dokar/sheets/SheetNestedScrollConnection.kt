@@ -36,7 +36,7 @@ internal class SheetNestedScrollConnection(
 
     override suspend fun onPreFling(available: Velocity): Velocity {
         if (!state.isAnimating && state.offsetY != 0f) {
-            state.onDragStopped()
+            state.onDragStopped(available.y)
         }
         val shouldConsumeFling = preSheetValue != BottomSheetValue.Expanded ||
                 state.value == BottomSheetValue.Peeked

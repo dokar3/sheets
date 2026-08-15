@@ -68,7 +68,9 @@ internal fun SampleScreen(
     isDarkTheme: Boolean,
     onUpdateDarkTheme: (Boolean) -> Unit,
     onOpenImeDemo: () -> Unit = {},
+    onOpenEmbeddedSheetDemo: () -> Unit = {},
     showImeDemoButton: Boolean = true,
+    showEmbeddedSheetDemoButton: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = if (isDarkTheme) Color(0xff121212) else Color.White
@@ -223,6 +225,12 @@ internal fun SampleScreen(
                     if (showImeDemoButton) {
                         Button(onClick = onOpenImeDemo) {
                             Text("Ime Delayed Expand")
+                        }
+                    }
+
+                    if (showEmbeddedSheetDemoButton) {
+                        Button(onClick = onOpenEmbeddedSheetDemo) {
+                            Text("Embedded sheet")
                         }
                     }
                 }
