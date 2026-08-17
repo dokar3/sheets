@@ -1,6 +1,6 @@
 [versions]
 activityCompose = "1.13.0"
-appcompat = "1.7.1"
+appcompat = "1.8.0"
 coilCompose = "3.5.0"
 composeCompiler = "1.5.11"
 coreKtx = "1.19.0"
